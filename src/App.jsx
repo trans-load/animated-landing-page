@@ -15,6 +15,7 @@ function App() {
   const [tweaksOpen, setTweaksOpen] = useStateApp(false);
   const [progress, setProgress] = useStateApp(0); // 0..1 over the transition window
   const [scrolled, setScrolled] = useStateApp(false);
+  const [heroInView, setHeroInView] = useStateApp(true); // hero section still touching viewport
   const [chipAnchors, setChipAnchors] = useStateApp({}); // {front,mid,back -> {x,y,onScreen}}
   const heroRef = useRefApp(null);
   const { lang, t } = window.useT();
@@ -50,6 +51,10 @@ function App() {
       const p = total > 0 ? scrolledPx / total : 0;
       setProgress(p);
       setScrolled(window.scrollY > 20);
+      // Hero is "in view" until its bottom edge scrolls past the top of
+      // the viewport. Used to fade the mobile position:fixed indicator
+      // once the user has scrolled past the hero section entirely.
+      setHeroInView(rect.bottom > 80);
     };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -146,6 +151,11 @@ function App() {
               justifyContent: 'space-between',
               gap: 40,
               pointerEvents: 'none',
+              // Fade out once the hero has scrolled past the viewport so
+              // the indicator (position:fixed on mobile) doesn't linger
+              // into the Install / Comparison sections.
+              opacity: heroInView ? 1 : 0,
+              transition: 'opacity 250ms ease',
             }}
           >
             <div style={{ maxWidth: 720 }}>

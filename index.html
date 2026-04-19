@@ -39,7 +39,21 @@
       transform: translateY(-50%) scale(2) !important;
       transform-origin: center center !important;
     }
-    .hero-bottombar { left: 16px !important; right: 16px !important; bottom: 32px !important; gap: 16px !important; }
+    /* Move the CAMERA FEED / 3D RECONSTRUCTION indicator to the top-right
+       of the hero on mobile so it sits above the YC "Unterstützt von"
+       pill that surfaces during the scroll reveal. */
+    .hero-bottombar {
+      position: fixed !important;  /* pin to viewport so it stays visible through the hero scroll */
+      left: auto !important;
+      right: 16px !important;
+      top: 76px !important;        /* just below the fixed header pill */
+      bottom: auto !important;
+      width: auto !important;
+      gap: 8px !important;
+      justify-content: flex-end !important;
+      z-index: 45 !important;      /* above the hero, below the header pill (z:50) */
+    }
+    .hero-bottombar > div:first-child { display: none !important; }  /* hide the empty spacer div */
     .hero-progress  { min-width: 0 !important; font-size: 9px !important; letter-spacing: 1.4px !important; gap: 8px !important; }
     .hero-progress > div { width: 56px !important; }
   }
