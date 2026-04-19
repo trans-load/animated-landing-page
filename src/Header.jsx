@@ -105,47 +105,6 @@ function Header({ accent = '#f97315', scrolled = false }) {
           />
         </a>
 
-        {/* Language toggle — always visible, incl. mobile */}
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            padding: 2,
-            borderRadius: 999,
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.10)',
-            marginRight: isMobile ? 0 : 4,
-          }}
-        >
-          {['en', 'de'].map((code) => {
-            const active = lang === code;
-            return (
-              <button
-                key={code}
-                onClick={() => setLang(code)}
-                aria-pressed={active}
-                aria-label={code === 'en' ? 'English' : 'Deutsch'}
-                style={{
-                  appearance: 'none',
-                  border: 'none',
-                  background: active ? 'rgba(255,255,255,0.14)' : 'transparent',
-                  color: active ? '#fff' : 'rgba(255,255,255,0.55)',
-                  fontFamily: '"JetBrains Mono", monospace',
-                  fontSize: 11,
-                  fontWeight: 700,
-                  letterSpacing: 1,
-                  padding: '6px 10px',
-                  borderRadius: 999,
-                  cursor: 'pointer',
-                  transition: 'background 120ms ease, color 120ms ease',
-                }}
-              >
-                {code.toUpperCase()}
-              </button>
-            );
-          })}
-        </div>
-
         {/* Nav */}
         {!isMobile && (
         <nav style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -226,6 +185,47 @@ function Header({ accent = '#f97315', scrolled = false }) {
           })}
         </nav>
         )}
+
+        {/* Language toggle — far right, always visible incl. mobile */}
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            padding: 2,
+            borderRadius: 999,
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.10)',
+            marginLeft: isMobile ? 'auto' : 8,
+          }}
+        >
+          {['en', 'de'].map((code) => {
+            const active = lang === code;
+            return (
+              <button
+                key={code}
+                onClick={() => setLang(code)}
+                aria-pressed={active}
+                aria-label={code === 'en' ? 'English' : 'Deutsch'}
+                style={{
+                  appearance: 'none',
+                  border: 'none',
+                  background: active ? 'rgba(255,255,255,0.14)' : 'transparent',
+                  color: active ? '#fff' : 'rgba(255,255,255,0.55)',
+                  fontFamily: '"JetBrains Mono", monospace',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: 1,
+                  padding: '6px 10px',
+                  borderRadius: 999,
+                  cursor: 'pointer',
+                  transition: 'background 120ms ease, color 120ms ease',
+                }}
+              >
+                {code.toUpperCase()}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </header>
   );

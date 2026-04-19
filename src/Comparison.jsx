@@ -245,7 +245,7 @@ function Card({ side, label, sublabel, img, rows, accent, inView, delay }) {
             height: '100%',
             objectFit: 'cover',
             display: 'block',
-            filter: isNow ? 'saturate(1.05) contrast(1.02)' : 'grayscale(85%) brightness(0.85) contrast(0.95)',
+            filter: isNow ? 'saturate(1.05) contrast(1.02)' : 'saturate(0.8) brightness(0.94) contrast(0.98)',
             transition: 'filter 400ms ease',
           }}
         />

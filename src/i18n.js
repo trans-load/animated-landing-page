@@ -25,7 +25,7 @@
       'hero.chip.mid':   '31.5\u2033 \u00d7 47.2\u2033 \u00d7 78.7\u2033',
       'hero.chip.back':  '23.6\u2033 \u00d7 31.5\u2033 \u00d7 59.1\u2033',
 
-      'trust.trusted_by': 'Trusted by',
+      'trust.trusted_by': 'Trusted by terminals handling 30,000 pallets in total',
 
       'install.eyebrow': 'How it installs',
       'install.headline.line1': 'No new hardware.',
@@ -74,7 +74,7 @@
       'hero.chip.mid':   '80 \u00d7 120 \u00d7 200 cm',
       'hero.chip.back':  '60 \u00d7 80 \u00d7 150 cm',
 
-      'trust.trusted_by': 'Unsere Partner',
+      'trust.trusted_by': 'Im Einsatz bei Terminals mit insgesamt 30.000 Paletten Umschlag',
 
       'install.eyebrow': 'So l\u00e4uft die Installation',
       'install.headline.line1': 'Keine neue Hardware.',
