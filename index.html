@@ -29,10 +29,15 @@
 
   /* Mobile responsive tweaks. Desktop keeps its inline styles untouched. */
   @media (max-width: 720px) {
-    /* Scale down the hero photo + point cloud so the initial view doesn't
-       feel tightly cropped in a portrait viewport. Transforms don't affect
-       layout, so sticky scrolling and sizing stay identical to desktop. */
-    .hero-scene { transform: scale(0.82); transform-origin: center center; }
+    /* Match the hero scene to the warehouse photo's native aspect (756:420)
+       and center it vertically in the sticky 100vh container so the full
+       image is visible with no cropping. Cloud + photo both fit this box. */
+    .hero-scene {
+      inset: 50% 0 auto 0 !important;  /* top 50%, right 0, bottom auto, left 0 */
+      width: 100% !important;
+      aspect-ratio: 756 / 420 !important;
+      transform: translateY(-50%) !important;
+    }
     .hero-bottombar { left: 16px !important; right: 16px !important; bottom: 32px !important; gap: 16px !important; }
     .hero-progress  { min-width: 0 !important; font-size: 9px !important; letter-spacing: 1.4px !important; gap: 8px !important; }
     .hero-progress > div { width: 56px !important; }
