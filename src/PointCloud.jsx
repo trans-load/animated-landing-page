@@ -383,9 +383,12 @@ function PointCloud({
       // re-render at 60 FPS when the hero is idle.
       const onProject = onAnchorProjectRef.current;
       if (onProject && s.chipAnchors && p >= 0.4 && p <= 1.0) {
+        // Use rect.width/height (visual, post-transform) not clientWidth/Height
+        // (layout, pre-transform) so chips stay anchored even when a parent
+        // applies a transform: scale() — e.g. the mobile hero zoom-out.
         const rect = s.container.getBoundingClientRect();
-        const cw = s.container.clientWidth;
-        const ch = s.container.clientHeight;
+        const cw = rect.width;
+        const ch = rect.height;
         const out = {};
         const tmp = new s.THREE.Vector3();
         for (const a of s.chipAnchors) {

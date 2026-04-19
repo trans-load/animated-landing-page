@@ -92,10 +92,11 @@ function App() {
         >
           {/* Hero scene: WebGL point cloud + photo plane that dissolves into it */}
           <div
+            className="hero-scene"
             style={{
               position: 'absolute',
               inset: 0,
-              willChange: 'opacity',
+              willChange: 'opacity, transform',
             }}
           >
             {/* Original photo as a DOM image — no WebGL filtering or resampling. */}
