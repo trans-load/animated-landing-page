@@ -22,11 +22,22 @@ const CAM_HALF_TAN_X = 0.851;
 const CAM_HALF_TAN_Y = 0.483;
 const CAM_FOV_Y_DEG = 2 * Math.atan(CAM_HALF_TAN_Y) * 180 / Math.PI; // ≈51.5°
 
+// Target UVs (in the warehouse.png image, u=right v=down) where each
+// dimension chip should hover. Used to pick 3D anchor points from the
+// cloud so chips track the actual boxes instead of drifting in vw/vh
+// units when the viewport changes size.
+const CHIP_ANCHOR_TARGETS = [
+  { key: 'front', u: 0.94, v: 0.72 },
+  { key: 'mid',   u: 0.62, v: 0.54 },
+  { key: 'back',  u: 0.72, v: 0.36 },
+];
+
 function PointCloud({
   progress = 0,
   pointSize = 1.6,
   accent = '#f97315',
   autoRotate = true,
+  onAnchorProject = null,
 }) {
   const containerRef = useRefPc(null);
   const stateRef = useRefPc(null);
@@ -34,11 +45,13 @@ function PointCloud({
   const rotateRef = useRefPc(autoRotate);
   const sizeRef = useRefPc(pointSize);
   const accentRef = useRefPc(accent);
+  const onAnchorProjectRef = useRefPc(onAnchorProject);
 
   useEffectPc(() => { progressRef.current = progress; }, [progress]);
   useEffectPc(() => { rotateRef.current = autoRotate; }, [autoRotate]);
   useEffectPc(() => { sizeRef.current = pointSize; }, [pointSize]);
   useEffectPc(() => { accentRef.current = accent; }, [accent]);
+  useEffectPc(() => { onAnchorProjectRef.current = onAnchorProject; }, [onAnchorProject]);
 
   useEffectPc(() => {
     if (!window.__SCENE_B64 || !window.THREE) return;
@@ -145,6 +158,29 @@ function PointCloud({
     }
     cx /= n; cy /= n; cz /= n;
     const cloudCenter = { x: cx, y: cy, z: cz };
+
+    // ---- Build 3D anchor points for dimension chips by finding, for each
+    // target UV, the cloud point whose image UV is closest. The chosen 3D
+    // position is then projected to screen coordinates every frame, so the
+    // chip stays pinned to that piece of the cloud regardless of viewport
+    // size or camera rotation.
+    const chipAnchors = CHIP_ANCHOR_TARGETS.map((t) => {
+      let bestIdx = 0, bestDist = Infinity;
+      for (let i = 0; i < n; i++) {
+        const du = uvs[i*2] - t.u;
+        const dv = uvs[i*2+1] - t.v;
+        const d = du*du + dv*dv;
+        if (d < bestDist) { bestDist = d; bestIdx = i; }
+      }
+      return {
+        key: t.key,
+        vec: new THREE.Vector3(
+          pos3D[bestIdx*3],
+          pos3D[bestIdx*3+1],
+          pos3D[bestIdx*3+2],
+        ),
+      };
+    });
 
     // ---- Geometry
     const geom = new THREE.BufferGeometry();
@@ -289,7 +325,7 @@ function PointCloud({
     stateRef.current = {
       THREE, scene, camera, renderer, points, mat, container,
       backdrop, backdropMat,
-      camHome, lookAt, cloudCenter,
+      camHome, lookAt, cloudCenter, chipAnchors,
       autoT: 0,
     };
 
@@ -340,6 +376,31 @@ function PointCloud({
       s.camera.lookAt(center.x, s.lookAt.y, center.z);
 
       s.renderer.render(s.scene, s.camera);
+
+      // Project chip anchors to viewport-absolute pixel coords for the
+      // dimension labels in App.jsx. Only called while the chips could
+      // be on screen (with a small buffer for fade-in), so App doesn't
+      // re-render at 60 FPS when the hero is idle.
+      const onProject = onAnchorProjectRef.current;
+      if (onProject && s.chipAnchors && p >= 0.4 && p <= 0.9) {
+        const rect = s.container.getBoundingClientRect();
+        const cw = s.container.clientWidth;
+        const ch = s.container.clientHeight;
+        const out = {};
+        const tmp = new s.THREE.Vector3();
+        for (const a of s.chipAnchors) {
+          tmp.copy(a.vec).project(s.camera);
+          const x = (tmp.x * 0.5 + 0.5) * cw + rect.left;
+          const y = (-tmp.y * 0.5 + 0.5) * ch + rect.top;
+          const onScreen =
+            tmp.z > -1 && tmp.z < 1 &&
+            tmp.x > -1.1 && tmp.x < 1.1 &&
+            tmp.y > -1.1 && tmp.y < 1.1;
+          out[a.key] = { x, y, onScreen };
+        }
+        onProject(out);
+      }
+
       rafId = requestAnimationFrame(tick);
     };
     rafId = requestAnimationFrame(tick);

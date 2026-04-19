@@ -15,6 +15,7 @@ function App() {
   const [tweaksOpen, setTweaksOpen] = useStateApp(false);
   const [progress, setProgress] = useStateApp(0); // 0..1 over the transition window
   const [scrolled, setScrolled] = useStateApp(false);
+  const [chipAnchors, setChipAnchors] = useStateApp({}); // {front,mid,back -> {x,y,onScreen}}
   const heroRef = useRefApp(null);
   const { lang, t } = window.useT();
 
@@ -118,6 +119,7 @@ function App() {
               pointSize={tweaks.pointSize}
               accent={tweaks.accent}
               autoRotate={false}
+              onAnchorProject={setChipAnchors}
             />
             {/* Bottom gradient for hero copy legibility */}
             <div
@@ -301,45 +303,55 @@ function App() {
           </div>
         </div>
 
-        {/* Per-item dimension chips — positioned next to the bounding boxes in the 3D scene */}
+        {/* Per-item dimension chips — 3D-anchored in the point cloud so they
+            follow the boxes across camera rotation and viewport changes. */}
         {(() => { const BBOX_COLOR = '#22a7f0'; return [
-          { key: 'front', dims: t('hero.chip.front'), pos: { right: '5vw',  bottom: '30vh' } },
-          { key: 'mid',   dims: t('hero.chip.mid'),   pos: { right: '34vw', bottom: '43vh' } },
-          { key: 'back',  dims: t('hero.chip.back'),  pos: { right: '25vw', bottom: '62vh' } },
-        ].map((chip) => (
-          <div
-            key={chip.key}
-            style={{
-              position: 'fixed',
-              ...chip.pos,
-              zIndex: 40,
-              opacity: progress >= 0.5 && progress < 0.8 ? 1 : 0,
-              transform: progress >= 0.5 && progress < 0.8 ? 'translateY(0)' : 'translateY(8px)',
-              transition: 'opacity 400ms ease, transform 400ms ease',
-              pointerEvents: 'none',
-              padding: '8px 12px',
-              borderRadius: 10,
-              background: 'rgba(10, 10, 12, 0.72)',
-              backdropFilter: 'blur(14px) saturate(140%)',
-              WebkitBackdropFilter: 'blur(14px) saturate(140%)',
-              border: `1px solid ${BBOX_COLOR}`,
-              boxShadow: `0 8px 24px rgba(0,0,0,0.45), 0 0 0 1px ${BBOX_COLOR}22`,
-              fontFamily: '"JetBrains Mono", monospace',
-              fontSize: 12,
-              color: 'rgba(255,255,255,0.92)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              whiteSpace: 'nowrap',
-            }}
-          >
-            <span style={{
-              width: 6, height: 6, borderRadius: '50%', background: tweaks.accent,
-              boxShadow: `0 0 8px ${tweaks.accent}`, flexShrink: 0,
-            }} />
-            <span>{chip.dims}</span>
-          </div>
-        )); })()}
+          { key: 'front', dims: t('hero.chip.front') },
+          { key: 'mid',   dims: t('hero.chip.mid')   },
+          { key: 'back',  dims: t('hero.chip.back')  },
+        ].map((chip) => {
+          const anchor = chipAnchors[chip.key];
+          const visible = progress >= 0.5 && progress < 0.8 && anchor && anchor.onScreen;
+          const x = anchor ? anchor.x : 0;
+          const y = anchor ? anchor.y : 0;
+          return (
+            <div
+              key={chip.key}
+              style={{
+                position: 'fixed',
+                left: 0,
+                top: 0,
+                zIndex: 40,
+                opacity: visible ? 1 : 0,
+                // Center chip horizontally on anchor, sit it ~22px above the box.
+                transform: `translate3d(${x}px, ${y}px, 0) translate(-50%, calc(-100% - 22px))${visible ? '' : ' translateY(8px)'}`,
+                transition: 'opacity 400ms ease',
+                pointerEvents: 'none',
+                padding: '8px 12px',
+                borderRadius: 10,
+                background: 'rgba(10, 10, 12, 0.72)',
+                backdropFilter: 'blur(14px) saturate(140%)',
+                WebkitBackdropFilter: 'blur(14px) saturate(140%)',
+                border: `1px solid ${BBOX_COLOR}`,
+                boxShadow: `0 8px 24px rgba(0,0,0,0.45), 0 0 0 1px ${BBOX_COLOR}22`,
+                fontFamily: '"JetBrains Mono", monospace',
+                fontSize: 12,
+                color: 'rgba(255,255,255,0.92)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                whiteSpace: 'nowrap',
+                willChange: 'transform, opacity',
+              }}
+            >
+              <span style={{
+                width: 6, height: 6, borderRadius: '50%', background: tweaks.accent,
+                boxShadow: `0 0 8px ${tweaks.accent}`, flexShrink: 0,
+              }} />
+              <span>{chip.dims}</span>
+            </div>
+          );
+        }); })()}
       </section>
       <section
         style={{
