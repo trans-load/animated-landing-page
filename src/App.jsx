@@ -247,11 +247,10 @@ function App() {
                 >
                   <span style={{ color: '#6b6b6b', fontWeight: 400 }}>{t('hero.yc.backed_by')}</span>
                   <img
-                    src="assets/partners/yc.png"
+                    src="assets/yc-logo.png"
                     alt="Y Combinator"
-                    style={{ height: 15, width: 15, display: 'block', borderRadius: 2 }}
+                    style={{ height: 16, width: 'auto', display: 'block' }}
                   />
-                  <span style={{ color: '#6b6b6b', fontWeight: 500 }}>{t('hero.yc.combinator')}</span>
                 </div>
                 <div>{t('hero.headline.line1')}</div>
                 <div style={{ marginTop: 6 }}>
@@ -604,8 +603,13 @@ function App() {
         </div>
       </section>
 
-      {/* What changes with transload — past vs. now comparison */}
-      <Comparison accent={tweaks.accent} />
+      {/* What changes with transload — past vs. now comparison.
+          ?comparison=v3 switches to the interactive tab/stage variant. */}
+      {(() => {
+        const variant = (new URLSearchParams(window.location.search).get('comparison') || 'v2').toLowerCase();
+        if (variant === 'v3' && window.ComparisonV3) return <ComparisonV3 accent={tweaks.accent} />;
+        return <Comparison accent={tweaks.accent} />;
+      })()}
 
       {/* Book a demo — Cal.com embed */}
       <BookDemo />

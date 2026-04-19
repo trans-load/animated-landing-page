@@ -16,8 +16,8 @@ function Header({ accent = '#f97315', scrolled = false }) {
     { key: 'installation', label: t('nav.installation'), href: '#install' },
     { key: 'comparison',   label: t('nav.comparison'),   href: '#comparison' },
     { key: 'demo',         label: t('nav.demo'),         href: '#book-demo' },
-    { key: 'phone',        label: t('nav.phone'),        href: 'tel:+4916095343013' },
-    { key: 'contact',      label: t('nav.contact'),      href: 'mailto:hello@transload.ai' },
+    { key: 'phone',        label: t('nav.phone'),        href: 'tel:+4916095343013', icon: 'phone' },
+    { key: 'contact',      label: t('nav.contact'),      href: '#book-demo' },
   ];
 
   return (
@@ -189,6 +189,7 @@ function Header({ accent = '#f97315', scrolled = false }) {
               <a
                 key={item.key}
                 href={item.href}
+                aria-label={item.icon ? item.label : undefined}
                 onMouseEnter={() => setHovered(item.key)}
                 onMouseLeave={() => setHovered(null)}
                 style={{
@@ -203,7 +204,7 @@ function Header({ accent = '#f97315', scrolled = false }) {
                   fontSize: 13.5,
                   fontWeight: 500,
                   letterSpacing: 0.1,
-                  padding: isCompact ? '8px 8px' : '8px 12px',
+                  padding: item.icon ? '8px 10px' : (isCompact ? '8px 8px' : '8px 12px'),
                   borderRadius: 999,
                   cursor: 'pointer',
                   display: 'flex',
@@ -212,7 +213,14 @@ function Header({ accent = '#f97315', scrolled = false }) {
                   transition: 'background 120ms ease',
                 }}
               >
-                {item.label}
+                {item.icon === 'phone' ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path
+                      d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24 11.36 11.36 0 003.58.57 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1 11.36 11.36 0 00.57 3.58 1 1 0 01-.24 1.01l-2.21 2.2z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                ) : item.label}
               </a>
             );
           })}
