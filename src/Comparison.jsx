@@ -41,9 +41,10 @@ function Comparison({ accent = '#f97315' }) {
   return (
     <section
       id="comparison"
+      className="comparison-section"
       ref={sectionRef}
       style={{
-        padding: '140px 40px 160px',
+        padding: '72px 40px 40px',
         borderTop: '1px solid rgba(255,255,255,0.06)',
         position: 'relative',
         overflow: 'hidden',
@@ -67,7 +68,7 @@ function Comparison({ accent = '#f97315' }) {
 
       <div style={{ maxWidth: 1240, margin: '0 auto', position: 'relative' }}>
         {/* Eyebrow + heading */}
-        <div style={{ textAlign: 'center', marginBottom: 88 }}>
+        <div style={{ textAlign: 'center', marginBottom: 64 }}>
           <div
             style={{
               display: 'inline-flex',
@@ -146,6 +147,9 @@ function Comparison({ accent = '#f97315' }) {
             .cmp-bridge { height: 80px !important; width: 100% !important; }
             .cmp-bridge-line { width: 1px !important; height: 100% !important; left: 50% !important; top: 0 !important; transform: translateX(-50%) !important; }
             .cmp-bridge-arrow { transform: translate(-50%, -50%) rotate(90deg) !important; }
+          }
+          @media (max-width: 720px) {
+            .comparison-section { padding: 56px 16px 32px !important; }
           }
         `}</style>
       </div>

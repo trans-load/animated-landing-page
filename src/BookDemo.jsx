@@ -56,8 +56,9 @@ function BookDemo() {
   return (
     <section
       id="book-demo"
+      className="bookdemo-section"
       style={{
-        padding: '120px 40px 140px',
+        padding: '72px 40px 80px',
         background: '#0a0a0a',
         borderTop: '1px solid rgba(255,255,255,0.06)',
       }}
@@ -70,7 +71,7 @@ function BookDemo() {
             letterSpacing: 2.5,
             textTransform: 'uppercase',
             color: '#8a8a85',
-            marginBottom: 28,
+            marginBottom: 20,
             textAlign: 'center',
           }}
         >
@@ -84,7 +85,7 @@ function BookDemo() {
             fontSize: 'clamp(34px, 4.2vw, 64px)',
             lineHeight: 1.08,
             letterSpacing: -1.2,
-            margin: '0 auto 56px',
+            margin: '0 auto 44px',
             maxWidth: 960,
             textAlign: 'center',
             color: '#ffffff',
@@ -112,6 +113,11 @@ function BookDemo() {
           />
         </div>
       </div>
+      <style>{`
+        @media (max-width: 720px) {
+          .bookdemo-section { padding: 48px 16px 56px !important; }
+        }
+      `}</style>
     </section>
   );
 }

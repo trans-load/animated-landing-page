@@ -27,9 +27,9 @@ const CAM_FOV_Y_DEG = 2 * Math.atan(CAM_HALF_TAN_Y) * 180 / Math.PI; // â‰ˆ51.5Â
 // cloud so chips track the actual boxes instead of drifting in vw/vh
 // units when the viewport changes size.
 const CHIP_ANCHOR_TARGETS = [
-  { key: 'front', u: 0.94, v: 0.72 },
+  { key: 'front', u: 0.99, v: 0.62 },
   { key: 'mid',   u: 0.62, v: 0.54 },
-  { key: 'back',  u: 0.72, v: 0.36 },
+  { key: 'back',  u: 0.72, v: 0.22 },
 ];
 
 function PointCloud({
@@ -382,7 +382,7 @@ function PointCloud({
       // be on screen (with a small buffer for fade-in), so App doesn't
       // re-render at 60 FPS when the hero is idle.
       const onProject = onAnchorProjectRef.current;
-      if (onProject && s.chipAnchors && p >= 0.4 && p <= 0.9) {
+      if (onProject && s.chipAnchors && p >= 0.4 && p <= 1.0) {
         const rect = s.container.getBoundingClientRect();
         const cw = s.container.clientWidth;
         const ch = s.container.clientHeight;

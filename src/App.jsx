@@ -134,6 +134,7 @@ function App() {
 
           {/* Hero copy */}
           <div
+            className="hero-bottombar"
             style={{
               position: 'absolute',
               left: 40,
@@ -181,6 +182,7 @@ function App() {
 
             {/* Right corner: tiny progress indicator */}
             <div
+              className="hero-progress"
               style={{
                 fontFamily: '"JetBrains Mono", monospace',
                 fontSize: 10,
@@ -311,7 +313,7 @@ function App() {
           { key: 'back',  dims: t('hero.chip.back')  },
         ].map((chip) => {
           const anchor = chipAnchors[chip.key];
-          const visible = progress >= 0.5 && progress < 0.8 && anchor && anchor.onScreen;
+          const visible = progress >= 0.5 && progress <= 1.0 && anchor && anchor.onScreen;
           const x = anchor ? anchor.x : 0;
           const y = anchor ? anchor.y : 0;
           return (
@@ -354,12 +356,9 @@ function App() {
         }); })()}
       </section>
       <section
+        className="trust-section"
         style={{
-          padding: '48px 40px 56px',
-          borderTop: '1px solid rgba(255,255,255,0.14)',
-          borderBottom: '1px solid rgba(255,255,255,0.14)',
-          background: '#000',
-          boxShadow: 'inset 0 14px 28px -18px rgba(0,0,0,0.9), inset 0 -14px 28px -18px rgba(0,0,0,0.9)',
+          padding: '32px 40px 36px',
           overflow: 'hidden',
         }}
       >
@@ -371,7 +370,7 @@ function App() {
               letterSpacing: 2.5,
               textTransform: 'uppercase',
               color: '#8a8a85',
-              marginBottom: 24,
+              marginBottom: 20,
               textAlign: 'center',
             }}
           >
@@ -392,7 +391,7 @@ function App() {
                 position: 'absolute',
                 top: 0, bottom: 0, left: 0,
                 width: 80,
-                background: 'linear-gradient(90deg, #000 0%, rgba(0,0,0,0) 100%)',
+                background: 'linear-gradient(90deg, #0a0a0a 0%, rgba(10,10,10,0) 100%)',
                 pointerEvents: 'none',
                 zIndex: 2,
               }}
@@ -403,33 +402,32 @@ function App() {
                 position: 'absolute',
                 top: 0, bottom: 0, right: 0,
                 width: 80,
-                background: 'linear-gradient(270deg, #000 0%, rgba(0,0,0,0) 100%)',
+                background: 'linear-gradient(270deg, #0a0a0a 0%, rgba(10,10,10,0) 100%)',
                 pointerEvents: 'none',
                 zIndex: 2,
               }}
             />
             <div
-              className="trust-track"
+              className="trust-track trust-track-anim"
               style={{
                 display: 'flex',
                 gap: 72,
                 alignItems: 'center',
                 width: 'max-content',
-                animation: 'trustMarquee 45s linear infinite',
               }}
             >
               {[...Array(2)].flatMap((_, dup) => (
                 [
                   { f: 'yc.png', url: 'https://www.ycombinator.com', scale: 0.85 },
                   { f: 'wahl-co.png', url: 'https://www.wahl-co.de', scale: 1.0 },
-                  { f: 'wolf.png', url: 'https://www.wolf-spedition.de', scale: 1.0 },
+                  { f: 'wolf.png', url: 'https://www.wolflogistics.de/', scale: 1.0 },
                   { f: 'koch.png', url: 'https://www.koch-international.de', scale: 1.0 },
-                  { f: 'hofmann.png', url: 'https://www.hofmann-unternehmensgruppe.de', scale: 1.1 },
-                  { f: 'eberl.png', url: 'https://www.eberl-logistik.de', scale: 1.0 },
+                  { f: 'hofmann.png', url: 'https://www.hofmann-spedition.de/', scale: 1.1 },
+                  { f: 'eberl.png', url: 'https://spedition-eberl.de/', scale: 1.0 },
                   { f: 'droeder.png', url: 'https://www.droeder-logistik.de', scale: 1.4 },
                   { f: 'ctl.png', url: 'https://www.ctl-logistics.com', scale: 1.0 },
-                  { f: 'emc.png', url: 'https://www.emc.tum.de', scale: 1.0, keepFilter: true },
-                  { f: 'xplore.png', url: 'https://www.xplore.network', scale: 1.15 },
+                  { f: 'emc.png', url: 'https://www.ei.tum.de/emc/home/', scale: 1.0, keepFilter: true },
+                  { f: 'xplore.png', url: 'https://www.unternehmertum.de/en/services/xplore', scale: 1.15 },
                   { f: 'utum.png', url: 'https://www.unternehmertum.de', scale: 1.0 },
                   { f: 'tumvl.svg', url: 'https://www.tum.de', scale: 1.1, tone: 'light' },
                 ].map(({ f, url, scale, tone, keepFilter }, i) => (
@@ -467,6 +465,9 @@ function App() {
               from { transform: translate3d(0,0,0); }
               to   { transform: translate3d(-50%,0,0); }
             }
+            .trust-track-anim {
+              animation: trustMarquee 45s linear infinite;
+            }
             .trust-track {
               will-change: transform;
               transform: translateZ(0);
@@ -476,6 +477,12 @@ function App() {
               filter: invert(1) grayscale(1);
               opacity: 0.95;
               transition: opacity 220ms ease, transform 220ms ease, filter 220ms ease;
+            }
+            @media (max-width: 720px) {
+              .trust-section { padding: 24px 16px 28px !important; }
+              .trust-track { gap: 44px !important; }
+              .trust-track-anim { animation-duration: 30s; }
+              .trust-logo { height: 28px !important; max-height: 28px; }
             }
             .trust-logo--light {
               filter: grayscale(1);
@@ -495,8 +502,9 @@ function App() {
       {/* Install story — runs on your existing cameras */}
       <section
         id="install"
+        className="install-section"
         style={{
-          padding: '120px 40px 140px',
+          padding: '72px 40px 40px',
           background: '#0a0a0a',
           borderTop: '1px solid rgba(255,255,255,0.06)',
         }}
@@ -509,7 +517,7 @@ function App() {
               letterSpacing: 2.5,
               textTransform: 'uppercase',
               color: '#8a8a85',
-              marginBottom: 28,
+              marginBottom: 20,
               textAlign: 'center',
             }}
           >
@@ -535,8 +543,9 @@ function App() {
           </h2>
 
           <div
+            className="install-grid"
             style={{
-              marginTop: 96,
+              marginTop: 72,
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',
               gap: 48,
@@ -580,6 +589,7 @@ function App() {
                   {p.title}
                 </div>
                 <div
+                  className="install-body"
                   style={{
                     fontFamily: '"Inter", system-ui, sans-serif',
                     fontSize: 16,
@@ -596,6 +606,23 @@ function App() {
               </div>
             ))}
           </div>
+          {/* Responsive: stack to 1 column on phones and drop the line-clamp
+              so body copy is fully visible. Keep the 3-column grid at tablet+. */}
+          <style>{`
+            @media (max-width: 860px) {
+              .install-section { padding: 56px 20px 32px !important; }
+              .install-grid {
+                grid-template-columns: 1fr !important;
+                gap: 28px !important;
+                margin-top: 44px !important;
+              }
+              .install-body {
+                -webkit-line-clamp: unset !important;
+                display: block !important;
+                overflow: visible !important;
+              }
+            }
+          `}</style>
 
           <div
             style={{
@@ -607,7 +634,7 @@ function App() {
               color: '#ffffff',
               textAlign: 'center',
               maxWidth: 860,
-              margin: '72px auto 0',
+              margin: '56px auto 0',
             }}
           >
             {t('install.footnote')}

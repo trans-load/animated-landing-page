@@ -10,6 +10,9 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
+  /* Account for the fixed header when jumping to an anchor so section
+     eyebrows don't disappear under the pill. */
+  #install, #comparison, #book-demo { scroll-margin-top: 88px; }
   html, body { margin: 0; padding: 0; background: #0a0a0a; }
   body {
     font-family: "Inter", system-ui, -apple-system, sans-serif;
@@ -23,6 +26,13 @@
   ::-webkit-scrollbar-track { background: #0a0a0a; }
   ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 5px; }
   ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+
+  /* Mobile responsive tweaks. Desktop keeps its inline styles untouched. */
+  @media (max-width: 720px) {
+    .hero-bottombar { left: 16px !important; right: 16px !important; bottom: 32px !important; gap: 16px !important; }
+    .hero-progress  { min-width: 0 !important; font-size: 9px !important; letter-spacing: 1.4px !important; gap: 8px !important; }
+    .hero-progress > div { width: 56px !important; }
+  }
 </style>
 </head>
 <body>

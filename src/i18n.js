@@ -21,11 +21,11 @@
       'hero.headline.dimensioners': 'dimensioners',
       'hero.scroll': 'Scroll',
 
-      'hero.chip.front': '31.5\u2033 \u00d7 47.2\u2033 \u00d7 39.4\u2033',
-      'hero.chip.mid':   '31.5\u2033 \u00d7 47.2\u2033 \u00d7 78.7\u2033',
-      'hero.chip.back':  '23.6\u2033 \u00d7 31.5\u2033 \u00d7 59.1\u2033',
+      'hero.chip.front': '31.9\u2033 \u00d7 46.9\u2033 \u00d7 40.2\u2033',
+      'hero.chip.mid':   '31.1\u2033 \u00d7 47.6\u2033 \u00d7 78.0\u2033',
+      'hero.chip.back':  '24.4\u2033 \u00d7 31.9\u2033 \u00d7 58.7\u2033',
 
-      'trust.trusted_by': 'Trusted by terminals handling 30,000 pallets in total',
+      'trust.trusted_by': 'Trusted by terminals handling 30,000 items per day',
 
       'install.eyebrow': 'How it installs',
       'install.headline.line1': 'No new hardware.',
@@ -70,11 +70,11 @@
       'hero.headline.dimensioners': 'Vermessungsger\u00e4te',
       'hero.scroll': 'Scrollen',
 
-      'hero.chip.front': '80 \u00d7 120 \u00d7 100 cm',
-      'hero.chip.mid':   '80 \u00d7 120 \u00d7 200 cm',
-      'hero.chip.back':  '60 \u00d7 80 \u00d7 150 cm',
+      'hero.chip.front': '81 \u00d7 119 \u00d7 102 cm',
+      'hero.chip.mid':   '79 \u00d7 121 \u00d7 198 cm',
+      'hero.chip.back':  '62 \u00d7 81 \u00d7 149 cm',
 
-      'trust.trusted_by': 'Im Einsatz bei Terminals mit insgesamt 30.000 Paletten Umschlag',
+      'trust.trusted_by': 'Getestet bei Umschlaghallen mit 30.000 Packst\u00fccken am Tag',
 
       'install.eyebrow': 'So l\u00e4uft die Installation',
       'install.headline.line1': 'Keine neue Hardware.',
