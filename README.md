@@ -26,7 +26,9 @@ animated-landing-page/
 │   ├── App.jsx          # Root component, scroll state, section composition, top-level styling
 │   ├── Header.jsx       # Fixed glassy top nav ("Installation", "Comparison", "Demo", "Phone", "Contact")
 │   ├── PointCloud.jsx   # Three.js scene: photo-to-point-cloud scroll transition
-│   ├── Comparison.jsx   # "What changes with transload" past-vs-now section
+│   ├── Comparison.jsx   # "What changes with transload" past-vs-now (default, V2: cinematic side-by-side + bridge arrow)
+│   ├── ComparisonV3.jsx # Alternative variant — interactive past/now tab toggle with auto-advance. Opt-in via ?comparison=v3
+│   ├── i18n.js          # EN/DE string tables, language detect/set, useT() hook. ?lang=de toggles
 │   ├── BookDemo.jsx     # Cal.com embed (inline scheduler)
 │   └── Tweaks.jsx       # In-page tweaks panel (accent color, point size, bg, transition mode)
 ├── assets/
@@ -53,7 +55,7 @@ Every section lives in `src/App.jsx` unless noted.
 | Per-item dimension chips | `src/App.jsx:304-344` | Three chips (front / mid / back), positioned next to items; fade in at `progress >= 0.5`, fade out at `progress >= 0.8` |
 | Partner banner ("Trusted by") | `src/App.jsx:345-471` | Black strip with duplicated-marquee animation; see "Partner banner" below |
 | Install story ("How it installs") | `src/App.jsx:474-614` | 01/02/03 steps + scan-event footnote |
-| Comparison ("What changes with transload") | `src/Comparison.jsx` | Two-column past-vs-now |
+| Comparison ("What changes with transload") | `src/Comparison.jsx` (default) / `src/ComparisonV3.jsx` (`?comparison=v3`) | V2: side-by-side cards with bridge arrow + scroll-reveal. V3: single-stage tab toggle with auto-advance |
 | Book a demo | `src/BookDemo.jsx` | Cal.com inline embed (`transload.cal.com/meet`) |
 | Tweaks panel (dev only) | `src/Tweaks.jsx` | Opened via `postMessage({type: '__activate_edit_mode'})` from parent; not visible by default |
 
@@ -111,7 +113,9 @@ Every section lives in `src/App.jsx` unless noted.
 | Retune the scroll transition phases | `revealP` / `rotateP` split in `PointCloud.jsx:316-317` (currently 0.7 / 0.3) |
 | Change the hero warehouse photo | Replace `assets/warehouse.png` — it's referenced as `warehouse.png?v=5` for cache-busting; bump the version query too |
 | Edit install steps or scan-event footnote | The array inside the install section in `App.jsx` |
-| Edit comparison rows | `pastRows` / `nowRows` arrays in `Comparison.jsx` |
+| Edit comparison copy (all languages) | `src/i18n.js` — keys under `comparison.past.*` / `comparison.now.*` |
+| Switch to the tab-toggle comparison variant | Append `?comparison=v3` to the URL |
+| Add a new language | Add a new key block in `src/i18n.js` STRINGS and include its code in `SUPPORTED` |
 | Edit book-a-demo destination | Cal.com namespace/origin inside `BookDemo.jsx:37-40` |
 
 ---

@@ -267,6 +267,9 @@ function Card({ side, label, sublabel, img, rows, accent, inView, delay }) {
             position: 'absolute',
             top: 14,
             left: 14,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
             fontFamily: mono,
             fontSize: 10,
             letterSpacing: 1.4,
@@ -274,12 +277,22 @@ function Card({ side, label, sublabel, img, rows, accent, inView, delay }) {
             color: isNow ? '#fff' : 'rgba(255,255,255,0.7)',
             padding: '4px 8px',
             borderRadius: 4,
-            background: 'rgba(0,0,0,0.55)',
+            background: isNow ? `${accent}cc` : 'rgba(0,0,0,0.55)',
             backdropFilter: 'blur(6px)',
             WebkitBackdropFilter: 'blur(6px)',
           }}
         >
+          {isNow && (
+            <span
+              style={{
+                width: 6, height: 6, borderRadius: '50%', background: '#fff',
+                boxShadow: '0 0 6px #fff',
+                animation: 'cmp-pulse 1.4s ease-in-out infinite',
+              }}
+            />
+          )}
           {isNow ? 'LIVE' : 'MANUAL'}
+          <style>{`@keyframes cmp-pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
         </div>
       </div>
 
