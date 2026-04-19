@@ -176,7 +176,7 @@ function ComparisonV3({ accent = '#f97315' }) {
           }}
         >
           <div
-            key={side + String(paused)}
+            key={side}
             style={{
               position: 'absolute',
               left: 0,
@@ -185,7 +185,8 @@ function ComparisonV3({ accent = '#f97315' }) {
               width: '100%',
               background: accent,
               transformOrigin: 'left',
-              animation: paused ? 'none' : `cmpv3-progress 6000ms linear forwards`,
+              animation: `cmpv3-progress 6000ms linear forwards`,
+              animationPlayState: paused ? 'paused' : 'running',
             }}
           />
           <style>{`
