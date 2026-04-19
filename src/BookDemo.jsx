@@ -3,6 +3,7 @@ const { useEffect: useEffectBD, useRef: useRefBD } = React;
 
 function BookDemo() {
   const mounted = useRefBD(false);
+  const { t } = window.useT();
 
   useEffectBD(() => {
     if (mounted.current) return;
@@ -73,7 +74,7 @@ function BookDemo() {
             textAlign: 'center',
           }}
         >
-          Book a demo
+          {t('book.eyebrow')}
         </div>
 
         <h2
@@ -89,7 +90,7 @@ function BookDemo() {
             color: '#ffffff',
           }}
         >
-          Explore what transload can do for you.
+          {t('book.headline')}
         </h2>
 
         <div

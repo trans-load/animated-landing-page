@@ -4,6 +4,7 @@ const { useState: useStateHd, useEffect: useEffectHd } = React;
 function Header({ accent = '#f97315', scrolled = false }) {
   const [hovered, setHovered] = useStateHd(null);
   const [vw, setVw] = useStateHd(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  const { lang, t, setLang } = window.useT();
   useEffectHd(() => {
     const onR = () => setVw(window.innerWidth);
     window.addEventListener('resize', onR);
@@ -12,11 +13,11 @@ function Header({ accent = '#f97315', scrolled = false }) {
   const isCompact = vw < 1100;
   const isMobile = vw < 720;
   const navItems = [
-    { label: 'Installation', href: '#install' },
-    { label: 'Comparison', href: '#comparison' },
-    { label: 'Demo', href: '#book-demo' },
-    { label: 'Phone', href: 'tel:+4916095343013' },
-    { label: 'Contact', href: 'mailto:hello@transload.ai' },
+    { key: 'installation', label: t('nav.installation'), href: '#install' },
+    { key: 'comparison',   label: t('nav.comparison'),   href: '#comparison' },
+    { key: 'demo',         label: t('nav.demo'),         href: '#book-demo' },
+    { key: 'phone',        label: t('nav.phone'),        href: 'tel:+4916095343013' },
+    { key: 'contact',      label: t('nav.contact'),      href: 'mailto:hello@transload.ai' },
   ];
 
   return (
@@ -104,15 +105,56 @@ function Header({ accent = '#f97315', scrolled = false }) {
           />
         </a>
 
+        {/* Language toggle — always visible, incl. mobile */}
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            padding: 2,
+            borderRadius: 999,
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.10)',
+            marginRight: isMobile ? 0 : 4,
+          }}
+        >
+          {['en', 'de'].map((code) => {
+            const active = lang === code;
+            return (
+              <button
+                key={code}
+                onClick={() => setLang(code)}
+                aria-pressed={active}
+                aria-label={code === 'en' ? 'English' : 'Deutsch'}
+                style={{
+                  appearance: 'none',
+                  border: 'none',
+                  background: active ? 'rgba(255,255,255,0.14)' : 'transparent',
+                  color: active ? '#fff' : 'rgba(255,255,255,0.55)',
+                  fontFamily: '"JetBrains Mono", monospace',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: 1,
+                  padding: '6px 10px',
+                  borderRadius: 999,
+                  cursor: 'pointer',
+                  transition: 'background 120ms ease, color 120ms ease',
+                }}
+              >
+                {code.toUpperCase()}
+              </button>
+            );
+          })}
+        </div>
+
         {/* Nav */}
         {!isMobile && (
         <nav style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           {navItems.map((item) => {
-            const isCTA = item.label === 'Contact';
+            const isCTA = item.key === 'contact';
             if (isCTA) {
               return (
                 <a
-                  key={item.label}
+                  key={item.key}
                   href={item.href}
                   style={{
                     textDecoration: 'none',
@@ -145,15 +187,15 @@ function Header({ accent = '#f97315', scrolled = false }) {
             }
             return (
               <a
-                key={item.label}
+                key={item.key}
                 href={item.href}
-                onMouseEnter={() => setHovered(item.label)}
+                onMouseEnter={() => setHovered(item.key)}
                 onMouseLeave={() => setHovered(null)}
                 style={{
                   textDecoration: 'none',
                   appearance: 'none',
                   background:
-                    hovered === item.label ? 'rgba(255,255,255,0.08)' : 'transparent',
+                    hovered === item.key ? 'rgba(255,255,255,0.08)' : 'transparent',
                   border: 'none',
                   color: 'rgba(255,255,255,0.92)',
                   fontFamily:

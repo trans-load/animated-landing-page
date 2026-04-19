@@ -4,16 +4,17 @@
 function Comparison({ accent = '#f97315' }) {
   const mono = '"JetBrains Mono", monospace';
   const sans = '"Inter", system-ui, -apple-system, sans-serif';
+  const { t } = window.useT();
 
   const pastRows = [
-    'Dimensions for a sample',
-    'Forklift detours to dimensioner station',
-    'Drivers waiting at the dimensioner',
+    t('comparison.past.row1'),
+    t('comparison.past.row2'),
+    t('comparison.past.row3'),
   ];
   const nowRows = [
-    'Dimensions for every item',
-    'Measure everywhere on the terminal',
-    'Runs fully in the background — no extra steps',
+    t('comparison.now.row1'),
+    t('comparison.now.row2'),
+    t('comparison.now.row3'),
   ];
 
   return (
@@ -36,7 +37,7 @@ function Comparison({ accent = '#f97315' }) {
               marginBottom: 16,
             }}
           >
-            What changes with transload
+            {t('comparison.eyebrow')}
           </div>
           <h2
             style={{
@@ -49,7 +50,7 @@ function Comparison({ accent = '#f97315' }) {
               color: '#fff',
             }}
           >
-            From a sample to full coverage.
+            {t('comparison.headline')}
           </h2>
         </div>
 
@@ -62,8 +63,8 @@ function Comparison({ accent = '#f97315' }) {
           }}
         >
           <Column
-            label="The past"
-            sublabel="Slow and manual"
+            label={t('comparison.past.label')}
+            sublabel={t('comparison.past.sublabel')}
             labelColor="rgba(255,255,255,0.95)"
             borderColor="rgba(255,255,255,0.08)"
             img="assets/past-dimensioner.png"
@@ -73,8 +74,8 @@ function Comparison({ accent = '#f97315' }) {
             imageTint="grayscale(15%)"
           />
           <Column
-            label="Now"
-            sublabel="Fast and automatic"
+            label={t('comparison.now.label')}
+            sublabel={t('comparison.now.sublabel')}
             labelColor={accent}
             borderColor={accent}
             img="assets/now-highlighted.png"

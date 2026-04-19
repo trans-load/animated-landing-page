@@ -16,6 +16,7 @@ function App() {
   const [progress, setProgress] = useStateApp(0); // 0..1 over the transition window
   const [scrolled, setScrolled] = useStateApp(false);
   const heroRef = useRefApp(null);
+  const { lang, t } = window.useT();
 
   // Tweak host integration
   useEffectApp(() => {
@@ -192,7 +193,7 @@ function App() {
                 justifyContent: 'flex-end',
               }}
             >
-              <span style={{ opacity: 0.6 }}>{progress < 0.5 ? 'CAMERA FEED' : '3D RECONSTRUCTION'}</span>
+              <span style={{ opacity: 0.6 }}>{progress < 0.5 ? t('hero.progress.feed') : t('hero.progress.recon')}</span>
               <div style={{ width: 80, height: 2, background: 'rgba(255,255,255,0.15)', borderRadius: 2, overflow: 'hidden' }}>
                 <div style={{ width: `${progress * 100}%`, height: '100%', background: tweaks.accent, transition: 'width 60ms linear' }} />
               </div>
@@ -244,17 +245,17 @@ function App() {
                     textShadow: 'none',
                   }}
                 >
-                  <span style={{ color: '#6b6b6b', fontWeight: 400 }}>Backed by</span>
+                  <span style={{ color: '#6b6b6b', fontWeight: 400 }}>{t('hero.yc.backed_by')}</span>
                   <img
                     src="assets/partners/yc.png"
                     alt="Y Combinator"
                     style={{ height: 15, width: 15, display: 'block', borderRadius: 2 }}
                   />
-                  <span style={{ color: '#6b6b6b', fontWeight: 500 }}>Combinator</span>
+                  <span style={{ color: '#6b6b6b', fontWeight: 500 }}>{t('hero.yc.combinator')}</span>
                 </div>
-                <div>Turn your security cameras</div>
+                <div>{t('hero.headline.line1')}</div>
                 <div style={{ marginTop: 6 }}>
-                  into{' '}
+                  {t('hero.headline.into')}{' '}
                   <span
                     style={{
                       background: 'linear-gradient(90deg, #ffb070 0%, #f97315 55%, #c95808 100%)',
@@ -264,7 +265,7 @@ function App() {
                       color: 'transparent',
                     }}
                   >
-                    dimensioners
+                    {t('hero.headline.dimensioners')}
                   </span>
                 </div>
               </div>
@@ -291,7 +292,7 @@ function App() {
               pointerEvents: 'none',
             }}
           >
-            <span>Scroll</span>
+            <span>{t('hero.scroll')}</span>
             <svg width="14" height="20" viewBox="0 0 14 20" fill="none">
               <rect x="1" y="1" width="12" height="18" rx="6" stroke="currentColor" strokeWidth="1" />
               <circle cx="7" cy="6" r="1.5" fill="currentColor">
@@ -303,9 +304,9 @@ function App() {
 
         {/* Per-item dimension chips — positioned next to the bounding boxes in the 3D scene */}
         {(() => { const BBOX_COLOR = '#22a7f0'; return [
-          { key: 'front', dims: '31.5″ × 47.2″ × 39.4″', pos: { right: '5vw',  bottom: '30vh' } },
-          { key: 'mid',   dims: '31.5″ × 47.2″ × 78.7″', pos: { right: '34vw', bottom: '43vh' } },
-          { key: 'back',  dims: '23.6″ × 31.5″ × 59.1″', pos: { right: '25vw', bottom: '62vh' } },
+          { key: 'front', dims: t('hero.chip.front'), pos: { right: '5vw',  bottom: '30vh' } },
+          { key: 'mid',   dims: t('hero.chip.mid'),   pos: { right: '34vw', bottom: '43vh' } },
+          { key: 'back',  dims: t('hero.chip.back'),  pos: { right: '25vw', bottom: '62vh' } },
         ].map((chip) => (
           <div
             key={chip.key}
@@ -363,7 +364,7 @@ function App() {
               textAlign: 'center',
             }}
           >
-            Trusted by
+            {t('trust.trusted_by')}
           </div>
 
           <div
@@ -501,7 +502,7 @@ function App() {
               textAlign: 'center',
             }}
           >
-            How it installs
+            {t('install.eyebrow')}
           </div>
 
           <h2
@@ -517,9 +518,9 @@ function App() {
               color: '#ffffff',
             }}
           >
-            No new hardware.<br />
-            No new workflows.<br />
-            <span style={{ color: '#8a8a85' }}>Just your existing cameras.</span>
+            {t('install.headline.line1')}<br />
+            {t('install.headline.line2')}<br />
+            <span style={{ color: '#8a8a85' }}>{t('install.headline.line3')}</span>
           </h2>
 
           <div
@@ -532,21 +533,9 @@ function App() {
             }}
           >
             {[
-              {
-                n: '01',
-                title: 'Works with your existing cameras',
-                body: 'We use what you have. Axis, Hikvision, Bosch, Dahua, Hanwha, or any IP camera.',
-              },
-              {
-                n: '02',
-                title: 'Zero process changes',
-                body: 'No workflow changes for your team. No new hardware. Optimize around speed.',
-              },
-              {
-                n: '03',
-                title: 'From sampling to full coverage',
-                body: 'Software\u2011only rollout. We connect to your WMS/TMS, calibrate and are ready to go.',
-              },
+              { n: '01', title: t('install.step1.title'), body: t('install.step1.body') },
+              { n: '02', title: t('install.step2.title'), body: t('install.step2.body') },
+              { n: '03', title: t('install.step3.title'), body: t('install.step3.body') },
             ].map((p) => (
               <div
                 key={p.n}
@@ -610,7 +599,7 @@ function App() {
               margin: '72px auto 0',
             }}
           >
-            License Plate Numbers are linked to dimensions with timestamp of scan.
+            {t('install.footnote')}
           </div>
         </div>
       </section>
