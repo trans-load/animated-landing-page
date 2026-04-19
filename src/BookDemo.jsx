@@ -89,7 +89,7 @@ function BookDemo() {
             color: '#ffffff',
           }}
         >
-          Explore Transload's value for your facility.
+          Explore what transload can do for you.
         </h2>
 
         <div

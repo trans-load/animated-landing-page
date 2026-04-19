@@ -301,58 +301,53 @@ function App() {
           </div>
         </div>
 
-        {/* Shipment dimension readout — sits just above the CAMERA FEED / 3D RECONSTRUCTION label */}
-        <div
-          style={{
-            position: 'fixed',
-            right: 24,
-            bottom: 'calc(72px + 15vh)',
-            zIndex: 40,
-            opacity: progress >= 0.15 && progress < 0.98 ? 1 : 0,
-            transform: progress >= 0.15 ? 'translateY(0)' : 'translateY(12px)',
-            transition: 'opacity 400ms ease, transform 400ms ease',
-            pointerEvents: 'none',
-            padding: '14px 18px',
-            borderRadius: 14,
-            background: 'rgba(10, 10, 12, 0.72)',
-            backdropFilter: 'blur(14px) saturate(140%)',
-            WebkitBackdropFilter: 'blur(14px) saturate(140%)',
-            border: `1px solid ${tweaks.accent}55`,
-            boxShadow: '0 10px 40px rgba(0,0,0,0.45)',
-            fontFamily: '"JetBrains Mono", monospace',
-            fontSize: 12,
-            color: 'rgba(255,255,255,0.92)',
-            minWidth: 260,
-          }}
-        >
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            fontSize: 10, letterSpacing: 2, textTransform: 'uppercase',
-            color: tweaks.accent, marginBottom: 10,
-          }}>
+        {/* Per-item dimension chips — positioned next to the bounding boxes in the 3D scene */}
+        {(() => { const BBOX_COLOR = '#22a7f0'; return [
+          { key: 'front', dims: '31.5″ × 47.2″ × 39.4″', pos: { right: '5vw',  bottom: '30vh' } },
+          { key: 'mid',   dims: '31.5″ × 47.2″ × 78.7″', pos: { right: '34vw', bottom: '43vh' } },
+          { key: 'back',  dims: '23.6″ × 31.5″ × 59.1″', pos: { right: '25vw', bottom: '62vh' } },
+        ].map((chip) => (
+          <div
+            key={chip.key}
+            style={{
+              position: 'fixed',
+              ...chip.pos,
+              zIndex: 40,
+              opacity: progress >= 0.5 && progress < 0.8 ? 1 : 0,
+              transform: progress >= 0.5 && progress < 0.8 ? 'translateY(0)' : 'translateY(8px)',
+              transition: 'opacity 400ms ease, transform 400ms ease',
+              pointerEvents: 'none',
+              padding: '8px 12px',
+              borderRadius: 10,
+              background: 'rgba(10, 10, 12, 0.72)',
+              backdropFilter: 'blur(14px) saturate(140%)',
+              WebkitBackdropFilter: 'blur(14px) saturate(140%)',
+              border: `1px solid ${BBOX_COLOR}`,
+              boxShadow: `0 8px 24px rgba(0,0,0,0.45), 0 0 0 1px ${BBOX_COLOR}22`,
+              fontFamily: '"JetBrains Mono", monospace',
+              fontSize: 12,
+              color: 'rgba(255,255,255,0.92)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              whiteSpace: 'nowrap',
+            }}
+          >
             <span style={{
               width: 6, height: 6, borderRadius: '50%', background: tweaks.accent,
-              boxShadow: `0 0 8px ${tweaks.accent}`,
+              boxShadow: `0 0 8px ${tweaks.accent}`, flexShrink: 0,
             }} />
-            Live dimensions
+            <span>{chip.dims}</span>
           </div>
-          {[1,2,3].map((i) => (
-            <div key={i} style={{
-              display: 'flex', justifyContent: 'space-between', gap: 16,
-              padding: '4px 0',
-              borderTop: i === 1 ? 'none' : '1px solid rgba(255,255,255,0.06)',
-            }}>
-              <span style={{ color: 'rgba(255,255,255,0.55)' }}>ShipmentID{i}</span>
-              <span>41″ × 55″ × 77″</span>
-            </div>
-          ))}
-        </div>
+        )); })()}
       </section>
       <section
         style={{
           padding: '48px 40px 56px',
-          borderTop: '1px solid rgba(0,0,0,0.06)',
-          background: '#f3f3f1',
+          borderTop: '1px solid rgba(255,255,255,0.14)',
+          borderBottom: '1px solid rgba(255,255,255,0.14)',
+          background: '#000',
+          boxShadow: 'inset 0 14px 28px -18px rgba(0,0,0,0.9), inset 0 -14px 28px -18px rgba(0,0,0,0.9)',
           overflow: 'hidden',
         }}
       >
@@ -385,7 +380,7 @@ function App() {
                 position: 'absolute',
                 top: 0, bottom: 0, left: 0,
                 width: 80,
-                background: 'linear-gradient(90deg, #f3f3f1 0%, rgba(243,243,241,0) 100%)',
+                background: 'linear-gradient(90deg, #000 0%, rgba(0,0,0,0) 100%)',
                 pointerEvents: 'none',
                 zIndex: 2,
               }}
@@ -396,7 +391,7 @@ function App() {
                 position: 'absolute',
                 top: 0, bottom: 0, right: 0,
                 width: 80,
-                background: 'linear-gradient(270deg, #f3f3f1 0%, rgba(243,243,241,0) 100%)',
+                background: 'linear-gradient(270deg, #000 0%, rgba(0,0,0,0) 100%)',
                 pointerEvents: 'none',
                 zIndex: 2,
               }}
@@ -413,19 +408,19 @@ function App() {
             >
               {[...Array(2)].flatMap((_, dup) => (
                 [
-                  { f: 'yc.png', url: 'https://www.ycombinator.com' },
-                  { f: 'wahl-co.png', url: 'https://www.wahl-co.de' },
-                  { f: 'wolf.png', url: 'https://www.wolf-spedition.de' },
-                  { f: 'koch.png', url: 'https://www.koch-international.de' },
-                  { f: 'hofmann.png', url: 'https://www.hofmann-unternehmensgruppe.de' },
-                  { f: 'eberl.png', url: 'https://www.eberl-logistik.de' },
-                  { f: 'droeder.png', url: 'https://www.droeder-logistik.de' },
-                  { f: 'ctl.png', url: 'https://www.ctl-logistics.com' },
-                  { f: 'emc.png', url: 'https://www.emc.tum.de' },
-                  { f: 'xplore.png', url: 'https://www.xplore.network' },
-                  { f: 'utum.png', url: 'https://www.unternehmertum.de' },
-                  { f: 'tumvl.svg', url: 'https://www.tum.de' },
-                ].map(({ f, url }, i) => (
+                  { f: 'yc.png', url: 'https://www.ycombinator.com', scale: 0.85 },
+                  { f: 'wahl-co.png', url: 'https://www.wahl-co.de', scale: 1.0 },
+                  { f: 'wolf.png', url: 'https://www.wolf-spedition.de', scale: 1.0 },
+                  { f: 'koch.png', url: 'https://www.koch-international.de', scale: 1.0 },
+                  { f: 'hofmann.png', url: 'https://www.hofmann-unternehmensgruppe.de', scale: 1.1 },
+                  { f: 'eberl.png', url: 'https://www.eberl-logistik.de', scale: 1.0 },
+                  { f: 'droeder.png', url: 'https://www.droeder-logistik.de', scale: 1.4 },
+                  { f: 'ctl.png', url: 'https://www.ctl-logistics.com', scale: 1.0 },
+                  { f: 'emc.png', url: 'https://www.emc.tum.de', scale: 1.0, keepFilter: true },
+                  { f: 'xplore.png', url: 'https://www.xplore.network', scale: 1.15 },
+                  { f: 'utum.png', url: 'https://www.unternehmertum.de', scale: 1.0 },
+                  { f: 'tumvl.svg', url: 'https://www.tum.de', scale: 1.1, tone: 'light' },
+                ].map(({ f, url, scale, tone, keepFilter }, i) => (
                   <a
                     key={`${dup}-${i}`}
                     href={url}
@@ -442,9 +437,9 @@ function App() {
                     <img
                       src={`assets/partners/${f}`}
                       alt=""
-                      className="trust-logo"
+                      className={`trust-logo${tone === 'light' ? ' trust-logo--light' : ''}${keepFilter ? ' trust-logo--keep' : ''}`}
                       style={{
-                        height: 44,
+                        height: 44 * scale,
                         width: 'auto',
                         objectFit: 'contain',
                         flexShrink: 0,
@@ -466,12 +461,20 @@ function App() {
               backface-visibility: hidden;
             }
             .trust-logo {
-              opacity: 0.45;
-              transition: opacity 220ms ease, transform 220ms ease;
+              filter: invert(1) grayscale(1);
+              opacity: 0.95;
+              transition: opacity 220ms ease, transform 220ms ease, filter 220ms ease;
+            }
+            .trust-logo--light {
+              filter: grayscale(1);
             }
             .trust-logo:hover {
+              filter: none;
               opacity: 1;
               transform: scale(1.06);
+            }
+            .trust-logo--keep:hover {
+              filter: invert(1) grayscale(1);
             }
           `}</style>
         </div>
@@ -593,10 +596,26 @@ function App() {
               </div>
             ))}
           </div>
+
+          <div
+            style={{
+              fontFamily: '"Inter", system-ui, sans-serif',
+              fontSize: 20,
+              fontWeight: 500,
+              letterSpacing: -0.3,
+              lineHeight: 1.25,
+              color: '#ffffff',
+              textAlign: 'center',
+              maxWidth: 860,
+              margin: '72px auto 0',
+            }}
+          >
+            License Plate Numbers are linked to dimensions with timestamp of scan.
+          </div>
         </div>
       </section>
 
-      {/* What changes with Transload — past vs. now comparison */}
+      {/* What changes with transload — past vs. now comparison */}
       <Comparison accent={tweaks.accent} />
 
       {/* Book a demo — Cal.com embed */}

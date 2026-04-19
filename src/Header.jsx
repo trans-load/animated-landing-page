@@ -1,4 +1,4 @@
-// Glassy floating header for Transload
+// Glassy floating header for transload
 const { useState: useStateHd, useEffect: useEffectHd } = React;
 
 function Header({ accent = '#f97315', scrolled = false }) {
@@ -99,7 +99,7 @@ function Header({ accent = '#f97315', scrolled = false }) {
         >
           <img
             src="assets/logo-default.png?v=2"
-            alt="Transload"
+            alt="transload"
             style={{ height: 22, display: 'block' }}
           />
         </a>

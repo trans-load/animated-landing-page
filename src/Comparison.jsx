@@ -1,4 +1,4 @@
-// "What changes with Transload" — past vs. now comparison section.
+// "What changes with transload" — past vs. now comparison section.
 // Dark-aesthetic match: cards on the site background, orange accent for "Now".
 
 function Comparison({ accent = '#f97315' }) {
@@ -6,12 +6,12 @@ function Comparison({ accent = '#f97315' }) {
   const sans = '"Inter", system-ui, -apple-system, sans-serif';
 
   const pastRows = [
-    'Dimension only a sample',
+    'Dimensions for a sample',
     'Forklift detours to dimensioner station',
     'Drivers waiting at the dimensioner',
   ];
   const nowRows = [
-    'Dimension every item',
+    'Dimensions for every item',
     'Measure everywhere on the terminal',
     'Runs fully in the background — no extra steps',
   ];
@@ -36,7 +36,7 @@ function Comparison({ accent = '#f97315' }) {
               marginBottom: 16,
             }}
           >
-            What changes with Transload
+            What changes with transload
           </div>
           <h2
             style={{
@@ -49,7 +49,7 @@ function Comparison({ accent = '#f97315' }) {
               color: '#fff',
             }}
           >
-            From sampling to full coverage.
+            From a sample to full coverage.
           </h2>
         </div>
 
