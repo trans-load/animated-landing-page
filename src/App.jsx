@@ -106,7 +106,7 @@ function App() {
           >
             {/* Original photo as a DOM image — no WebGL filtering or resampling. */}
             <img
-              src="assets/warehouse.png?v=5"
+              src="assets/warehouse.png?v=6"
               alt=""
               style={{
                 position: 'absolute',
@@ -635,21 +635,6 @@ function App() {
             }
           `}</style>
 
-          <div
-            style={{
-              fontFamily: '"Inter", system-ui, sans-serif',
-              fontSize: 20,
-              fontWeight: 500,
-              letterSpacing: -0.3,
-              lineHeight: 1.25,
-              color: '#ffffff',
-              textAlign: 'center',
-              maxWidth: 860,
-              margin: '56px auto 0',
-            }}
-          >
-            {t('install.footnote')}
-          </div>
         </div>
       </section>
 
