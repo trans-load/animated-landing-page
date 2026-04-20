@@ -44,7 +44,7 @@ function Comparison({ accent = '#f97315' }) {
       className="comparison-section"
       ref={sectionRef}
       style={{
-        padding: '72px 40px 40px',
+        padding: '112px 40px 96px',
         borderTop: '1px solid rgba(255,255,255,0.06)',
         position: 'relative',
         overflow: 'hidden',
@@ -68,7 +68,7 @@ function Comparison({ accent = '#f97315' }) {
 
       <div style={{ maxWidth: 1240, margin: '0 auto', position: 'relative' }}>
         {/* Eyebrow + heading */}
-        <div style={{ textAlign: 'center', marginBottom: 64 }}>
+        <div style={{ textAlign: 'center', marginBottom: 88 }}>
           <div
             style={{
               display: 'inline-flex',

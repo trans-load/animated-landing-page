@@ -314,6 +314,38 @@ function App() {
               </circle>
             </svg>
           </div>
+
+          {/* Second scroll cue — appears during the reveal/rotate phase
+              so the user knows the animation is still driven by scroll
+              and keeps going. Opacity peaks at progress ~0.7 and fades
+              out as we approach the end of the hero scroll. */}
+          <div
+            style={{
+              position: 'absolute',
+              left: '50%',
+              bottom: 28,
+              transform: 'translateX(-50%)',
+              opacity: Math.max(0, Math.min(1, (progress - 0.5) / 0.15) - Math.max(0, (progress - 0.85) / 0.1)),
+              fontFamily: '"JetBrains Mono", monospace',
+              fontSize: 10,
+              letterSpacing: 2,
+              color: 'rgba(255,255,255,0.7)',
+              textTransform: 'uppercase',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 6,
+              pointerEvents: 'none',
+              transition: 'opacity 120ms linear',
+            }}
+          >
+            <span>{t('hero.scroll')}</span>
+            <svg width="14" height="20" viewBox="0 0 14 20" fill="none" aria-hidden="true">
+              <path d="M7 3 L7 15 M2 10 L7 15 L12 10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                <animate attributeName="opacity" values="0.4;1;0.4" dur="1.6s" repeatCount="indefinite" />
+              </path>
+            </svg>
+          </div>
         </div>
 
         {/* Per-item dimension chips — 3D-anchored in the point cloud so they
@@ -324,7 +356,7 @@ function App() {
           { key: 'back',  dims: t('hero.chip.back')  },
         ].map((chip) => {
           const anchor = chipAnchors[chip.key];
-          const visible = progress >= 0.5 && progress <= 1.0 && anchor && anchor.onScreen;
+          const visible = progress >= 0.5 && progress <= 0.88 && anchor && anchor.onScreen;
           const x = anchor ? anchor.x : 0;
           const y = anchor ? anchor.y : 0;
           return (
@@ -369,7 +401,7 @@ function App() {
       <section
         className="trust-section"
         style={{
-          padding: '32px 40px 36px',
+          padding: '56px 40px 64px',
           overflow: 'hidden',
         }}
       >
@@ -430,13 +462,13 @@ function App() {
               {[...Array(2)].flatMap((_, dup) => (
                 [
                   { f: 'yc.png', url: 'https://www.ycombinator.com', scale: 0.85 },
-                  { f: 'wahl-co.png', url: 'https://www.wahl-co.de', scale: 1.0 },
-                  { f: 'wolf.png', url: 'https://www.wolflogistics.de/', scale: 1.0 },
+                  { f: 'wahl-co.png', url: 'https://www.wahl.co/en', scale: 1.0 },
+                  { f: 'wolf.png', url: 'https://www.wolf-straubing.de/', scale: 1.0 },
                   { f: 'koch.png', url: 'https://www.koch-international.de', scale: 1.0 },
                   { f: 'hofmann.png', url: 'https://www.hofmann-spedition.de/', scale: 1.1 },
                   { f: 'eberl.png', url: 'https://spedition-eberl.de/', scale: 1.0 },
                   { f: 'droeder.png', url: 'https://www.droeder-logistik.de', scale: 1.4 },
-                  { f: 'ctl.png', url: 'https://www.ctl-logistics.com', scale: 1.0 },
+                  { f: 'ctl.png', url: 'https://ctl-ag.de/', scale: 1.0 },
                   { f: 'emc.png', url: 'https://www.ei.tum.de/emc/home/', scale: 1.0, keepFilter: true },
                   { f: 'xplore.png', url: 'https://www.unternehmertum.de/en/services/xplore', scale: 1.15 },
                   { f: 'utum.png', url: 'https://www.unternehmertum.de', scale: 1.0 },
@@ -515,26 +547,12 @@ function App() {
         id="install"
         className="install-section"
         style={{
-          padding: '72px 40px 40px',
+          padding: '112px 40px 80px',
           background: '#0a0a0a',
           borderTop: '1px solid rgba(255,255,255,0.06)',
         }}
       >
         <div style={{ maxWidth: 1180, margin: '0 auto' }}>
-          <div
-            style={{
-              fontFamily: '"JetBrains Mono", monospace',
-              fontSize: 11,
-              letterSpacing: 2.5,
-              textTransform: 'uppercase',
-              color: '#8a8a85',
-              marginBottom: 20,
-              textAlign: 'center',
-            }}
-          >
-            {t('install.eyebrow')}
-          </div>
-
           <h2
             style={{
               fontFamily: '"Inter", system-ui, sans-serif',
@@ -556,10 +574,10 @@ function App() {
           <div
             className="install-grid"
             style={{
-              marginTop: 72,
+              marginTop: 96,
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: 48,
+              gap: 56,
               alignItems: 'start',
             }}
           >

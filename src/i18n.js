@@ -7,8 +7,8 @@
 
   const STRINGS = {
     en: {
-      'nav.installation': 'Installation',
-      'nav.comparison': 'Comparison',
+      'nav.installation': 'Integration',
+      'nav.comparison': 'Benefits',
       'nav.demo': 'Demo',
       'nav.phone': 'Phone',
       'nav.contact': 'Contact',
@@ -56,8 +56,8 @@
       'book.headline': 'Explore what transload can do for you.',
     },
     de: {
-      'nav.installation': 'Installation',
-      'nav.comparison': 'Vergleich',
+      'nav.installation': 'Anbindung',
+      'nav.comparison': 'Vorteile',
       'nav.demo': 'Demo',
       'nav.phone': 'Telefon',
       'nav.contact': 'Kontakt',

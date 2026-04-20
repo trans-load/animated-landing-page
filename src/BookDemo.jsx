@@ -58,26 +58,12 @@ function BookDemo() {
       id="book-demo"
       className="bookdemo-section"
       style={{
-        padding: '72px 40px 80px',
+        padding: '112px 40px 128px',
         background: '#0a0a0a',
         borderTop: '1px solid rgba(255,255,255,0.06)',
       }}
     >
       <div style={{ maxWidth: 1180, margin: '0 auto' }}>
-        <div
-          style={{
-            fontFamily: '"JetBrains Mono", monospace',
-            fontSize: 11,
-            letterSpacing: 2.5,
-            textTransform: 'uppercase',
-            color: '#8a8a85',
-            marginBottom: 20,
-            textAlign: 'center',
-          }}
-        >
-          {t('book.eyebrow')}
-        </div>
-
         <h2
           style={{
             fontFamily: '"Inter", system-ui, sans-serif',
@@ -85,7 +71,7 @@ function BookDemo() {
             fontSize: 'clamp(34px, 4.2vw, 64px)',
             lineHeight: 1.08,
             letterSpacing: -1.2,
-            margin: '0 auto 44px',
+            margin: '0 auto 72px',
             maxWidth: 960,
             textAlign: 'center',
             color: '#ffffff',
