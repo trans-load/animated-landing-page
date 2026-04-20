@@ -262,10 +262,11 @@ function App() {
                 >
                   <span style={{ color: '#6b6b6b', fontWeight: 400 }}>{t('hero.yc.backed_by')}</span>
                   <img
-                    src="assets/yc-logo.png"
-                    alt="Y Combinator"
-                    style={{ height: 16, width: 'auto', display: 'block' }}
+                    src="assets/partners/yc.png"
+                    alt="Y"
+                    style={{ height: 16, width: 16, display: 'block', borderRadius: 3 }}
                   />
+                  <span style={{ color: '#6b6b6b', fontWeight: 500 }}>Combinator</span>
                 </div>
                 <div>{t('hero.headline.line1')}</div>
                 <div style={{ marginTop: 6 }}>
