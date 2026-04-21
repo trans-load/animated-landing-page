@@ -12,12 +12,13 @@ function Header({ accent = '#f97315', scrolled = false }) {
   }, []);
   const isCompact = vw < 1100;
   const isMobile = vw < 720;
+  // Use root-anchored hashes so the nav works from legal sub-pages too.
   const navItems = [
-    { key: 'installation', label: t('nav.installation'), href: '#install' },
-    { key: 'comparison',   label: t('nav.comparison'),   href: '#comparison' },
-    { key: 'demo',         label: t('nav.demo'),         href: '#book-demo' },
+    { key: 'installation', label: t('nav.installation'), href: '/#install' },
+    { key: 'comparison',   label: t('nav.comparison'),   href: '/#comparison' },
+    { key: 'demo',         label: t('nav.demo'),         href: '/#book-demo' },
     { key: 'phone',        label: t('nav.phone'),        href: 'tel:+4916095343013', icon: 'phone' },
-    { key: 'contact',      label: t('nav.contact'),      href: '#book-demo' },
+    { key: 'contact',      label: t('nav.contact'),      href: '/#book-demo' },
   ];
 
   return (
@@ -88,7 +89,7 @@ function Header({ accent = '#f97315', scrolled = false }) {
       >
         {/* Logo */}
         <a
-          href="#"
+          href="/"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -99,7 +100,7 @@ function Header({ accent = '#f97315', scrolled = false }) {
           }}
         >
           <img
-            src="assets/logo-default.png?v=2"
+            src="/assets/logo-default.png?v=2"
             alt="transload"
             style={{ height: 22, display: 'block' }}
           />

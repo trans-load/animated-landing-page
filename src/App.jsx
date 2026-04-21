@@ -668,6 +668,9 @@ function App() {
       {/* Book a demo — Cal.com embed */}
       <BookDemo />
 
+      {/* Site footer — contact + legal links */}
+      <Footer accent={tweaks.accent} />
+
       {tweaksOpen && (
         <Tweaks values={tweaks} onChange={updateTweaks} onClose={() => setTweaksOpen(false)} />
       )}
