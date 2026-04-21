@@ -26,7 +26,7 @@ function Imprint() {
 
       <h2>{en ? 'Editorial Responsibility' : 'Redaktionell verantwortlich'}</h2>
       <p>
-        Jago Wahl-Schwentker {en ? 'and' : 'und'} Nils B&ouml;rner
+        Jago Wahl-Schwentker, Nils B&ouml;rner {en ? 'and' : 'und'} Julius Scheel
       </p>
     </LegalShell>
   );

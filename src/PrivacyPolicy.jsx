@@ -51,7 +51,7 @@ function PrivacyPolicy() {
             <br />
             Germany
           </p>
-          <p>Authorized representatives: Nils B&ouml;rner, Jago Wahl-Schwentker</p>
+          <p>Authorized representatives: Nils B&ouml;rner, Jago Wahl-Schwentker, Julius Scheel</p>
           <p>Email address: contact@transload.io</p>
           <p>Telephone: +4915258549146</p>
           <p>
@@ -1047,7 +1047,7 @@ function PrivacyPolicy() {
             <br />
             Deutschland
           </p>
-          <p>Vertretungsberechtigte Personen: Nils B&ouml;rner, Jago Wahl-Schwentker</p>
+          <p>Vertretungsberechtigte Personen: Nils B&ouml;rner, Jago Wahl-Schwentker, Julius Scheel</p>
           <p>E-Mail-Adresse: contact@transload.io</p>
           <p>Telefon: +4915258549146</p>
           <p>
