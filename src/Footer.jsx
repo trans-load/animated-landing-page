@@ -6,13 +6,13 @@ function Footer({ accent = '#f97315' }) {
     color: 'rgba(255,255,255,0.62)',
     textDecoration: 'none',
     fontFamily: '"Inter", system-ui, sans-serif',
-    fontSize: 14,
-    padding: '8px 10px',
-    borderRadius: 8,
+    fontSize: 13,
+    padding: '4px 8px',
+    borderRadius: 6,
     display: 'inline-flex',
     alignItems: 'center',
-    gap: 8,
-    minHeight: 36,
+    gap: 6,
+    minHeight: 28,
   };
 
   return (
@@ -20,7 +20,7 @@ function Footer({ accent = '#f97315' }) {
       style={{
         background: '#0a0a0a',
         borderTop: '1px solid rgba(255,255,255,0.08)',
-        padding: '40px 24px 48px',
+        padding: '16px 24px',
         marginTop: 0,
       }}
     >
@@ -32,7 +32,7 @@ function Footer({ accent = '#f97315' }) {
           flexWrap: 'wrap',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: 24,
+          gap: 16,
         }}
       >
         <p
@@ -40,7 +40,7 @@ function Footer({ accent = '#f97315' }) {
             margin: 0,
             color: 'rgba(255,255,255,0.45)',
             fontFamily: '"Inter", system-ui, sans-serif',
-            fontSize: 13,
+            fontSize: 12,
             letterSpacing: 0.1,
           }}
         >
