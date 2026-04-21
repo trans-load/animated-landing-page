@@ -1,0 +1,16 @@
+{
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "dataact.transload.io" }],
+      "destination": "https://transload.io/dataact",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "dataact.trans-load.de" }],
+      "destination": "https://transload.io/dataact",
+      "permanent": true
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="/assets/favicon.png" />
+<link rel="apple-touch-icon" href="/assets/favicon.png" />
+<title>Legal Notice — transload</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/src/legal.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #0a0a0a; }
+  body {
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    color: #fff;
+    overflow-x: hidden;
+  }
+  #root { min-height: 100vh; }
+  ::selection { background: #f97315; color: #0a0a0a; }
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: #0a0a0a; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- React + Babel (pinned) -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+
+<!-- i18n (must load before Babel-transpiled components) -->
+<script src="/src/i18n.js"></script>
+
+<!-- Shared components -->
+<script type="text/babel" data-presets="react" src="/src/Header.jsx"></script>
+<script type="text/babel" data-presets="react" src="/src/Footer.jsx"></script>
+<script type="text/babel" data-presets="react" src="/src/LegalShell.jsx"></script>
+
+<!-- Page -->
+<script type="text/babel" data-presets="react" src="/src/Imprint.jsx"></script>
+</body>
+</html>

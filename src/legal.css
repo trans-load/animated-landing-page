@@ -1,0 +1,147 @@
+/* Shared styles for legal sub-pages (imprint, privacy-policy, dataact).
+   Inherits the dark theme + Inter typography from the landing page. */
+
+.legal-page {
+  background: #0a0a0a;
+  color: rgba(255, 255, 255, 0.86);
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  padding: 140px 24px 72px;
+}
+
+.legal-container {
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.legal-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  font-size: 13px;
+  letter-spacing: 0.2px;
+  margin-bottom: 28px;
+  padding: 6px 10px 6px 6px;
+  border-radius: 999px;
+  transition: color 160ms ease, background 160ms ease;
+}
+.legal-back:hover {
+  color: #f97315;
+  background: rgba(249, 115, 21, 0.08);
+}
+
+.legal-container h1 {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  color: #f97315;
+  margin: 0 0 8px;
+  line-height: 1.15;
+}
+
+.legal-container h2 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  color: #f97315;
+  margin: 44px 0 14px;
+  line-height: 1.25;
+}
+
+.legal-container h3 {
+  font-size: 16.5px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 28px 0 10px;
+  letter-spacing: -0.1px;
+}
+
+.legal-container p {
+  font-size: 15px;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.78);
+  margin: 0 0 14px;
+}
+
+.legal-container ul {
+  padding-left: 22px;
+  margin: 0 0 16px;
+}
+
+.legal-container li {
+  font-size: 15px;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.78);
+  margin-bottom: 6px;
+}
+
+.legal-container ul.index {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 18px;
+}
+
+.legal-container ul.index li {
+  margin: 0;
+}
+
+.legal-container .index-link {
+  color: rgba(255, 255, 255, 0.62);
+  text-decoration: none;
+  font-size: 14px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+  padding-bottom: 2px;
+}
+.legal-container .index-link:hover {
+  color: #f97315;
+  border-bottom-color: rgba(249, 115, 21, 0.4);
+}
+
+.legal-container a {
+  color: #f97315;
+  text-decoration: none;
+}
+.legal-container a:hover {
+  text-decoration: underline;
+}
+
+.legal-container code {
+  background: rgba(255, 255, 255, 0.07);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.legal-container strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.legal-container .legal-meta {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 13px;
+  margin-bottom: 28px;
+}
+
+.legal-container .legal-block a {
+  word-break: break-word;
+}
+
+@media (max-width: 720px) {
+  .legal-page {
+    padding: 110px 18px 60px;
+  }
+  .legal-container h1 { font-size: 26px; }
+  .legal-container h2 { font-size: 19px; margin-top: 36px; }
+  .legal-container h3 { font-size: 15.5px; }
+  .legal-container ul.index {
+    grid-template-columns: 1fr;
+  }
+}
