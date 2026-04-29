@@ -663,6 +663,9 @@ function App() {
         return <Comparison accent={tweaks.accent} />;
       })()}
 
+      {/* Founder contact cards */}
+      <FounderCards accent={tweaks.accent} />
+
       {/* Book a demo — Cal.com embed */}
       <BookDemo />
 
