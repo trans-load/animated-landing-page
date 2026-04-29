@@ -52,6 +52,10 @@
       'comparison.now.row2': 'Measure everywhere on the terminal',
       'comparison.now.row3': 'Runs fully in the background \u2014 no extra steps',
 
+      'founders.title': "transload's founders",
+      'founders.role': 'Co-Founder',
+      'founders.email': 'Email',
+
       'book.eyebrow': 'Book a demo',
       'book.headline': 'Explore what transload can do for you.',
     },
@@ -100,6 +104,10 @@
       'comparison.now.row1': 'Abmessungen f\u00fcr jede Sendung',
       'comparison.now.row2': 'Abmessung \u00fcberall auf der Umschlaghalle',
       'comparison.now.row3': 'L\u00e4uft vollst\u00e4ndig im Hintergrund \u2014 keine zus\u00e4tzlichen Schritte',
+
+      'founders.title': 'Die Gr\u00fcnder von transload',
+      'founders.role': 'Mitgr\u00fcnder',
+      'founders.email': 'E-Mail',
 
       'book.eyebrow': 'Demo buchen',
       'book.headline': 'Erfahren Sie, was transload kann.',
