@@ -134,6 +134,160 @@
   word-break: break-word;
 }
 
+.legal-eyebrow {
+  color: rgba(255, 255, 255, 0.5);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.gdpr-page-copy .legal-meta {
+  margin-bottom: 18px;
+}
+
+.gdpr-intro {
+  max-width: 760px;
+  font-size: 16px !important;
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+
+.gdpr-toc {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 34px 0 28px;
+}
+
+.gdpr-toc a {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+  color: rgba(255, 255, 255, 0.78);
+  display: flex;
+  gap: 12px;
+  min-height: 62px;
+  padding: 14px 16px;
+  text-decoration: none;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.gdpr-toc a:hover {
+  background: rgba(249, 115, 21, 0.08);
+  border-color: rgba(249, 115, 21, 0.28);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.gdpr-toc span,
+.gdpr-number {
+  align-items: center;
+  background: rgba(249, 115, 21, 0.13);
+  border: 1px solid rgba(249, 115, 21, 0.28);
+  border-radius: 999px;
+  color: #f97315;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  justify-content: center;
+  letter-spacing: 0.8px;
+  min-width: 34px;
+  padding: 6px 8px;
+}
+
+.gdpr-controls {
+  display: grid;
+  gap: 18px;
+}
+
+.gdpr-card {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.035)),
+    rgba(255,255,255,0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.24);
+  padding: 28px;
+  scroll-margin-top: 110px;
+}
+
+.gdpr-card-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.gdpr-card-heading h2 {
+  color: #ffffff;
+  margin: 0 0 4px;
+}
+
+.gdpr-card-heading p {
+  color: rgba(249, 115, 21, 0.76);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  margin: 0;
+}
+
+.gdpr-subsection {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 24px;
+  padding-top: 22px;
+}
+
+.gdpr-subsection h3 {
+  color: #f97315;
+  font-size: 18px;
+  margin-top: 0;
+}
+
+.gdpr-control-group {
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 18px;
+  margin-top: 14px;
+  padding: 18px 18px 14px;
+}
+
+.gdpr-control-group h4 {
+  color: #ffffff;
+  font-size: 15px;
+  letter-spacing: -0.1px;
+  margin: 0 0 8px;
+}
+
+.legal-container .gdpr-list {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin-top: 14px;
+  padding-left: 0;
+}
+
+.legal-container .gdpr-list li {
+  margin: 0;
+  padding-left: 22px;
+  position: relative;
+}
+
+.legal-container .gdpr-list li::before {
+  background: #f97315;
+  border-radius: 50%;
+  box-shadow: 0 0 18px rgba(249, 115, 21, 0.35);
+  content: "";
+  height: 6px;
+  left: 2px;
+  position: absolute;
+  top: 10px;
+  width: 6px;
+}
+
 @media (max-width: 720px) {
   .legal-page {
     padding: 110px 18px 60px;
@@ -143,5 +297,15 @@
   .legal-container h3 { font-size: 15.5px; }
   .legal-container ul.index {
     grid-template-columns: 1fr;
+  }
+  .gdpr-toc {
+    grid-template-columns: 1fr;
+  }
+  .gdpr-card {
+    border-radius: 20px;
+    padding: 22px 18px;
+  }
+  .gdpr-card-heading {
+    gap: 12px;
   }
 }
