@@ -652,7 +652,7 @@ function App() {
             {t('faq.headline')}
           </h2>
           <div>
-            {[1, 2, 3, 4, 5, 6].map((i) => (
+            {[1, 3, 4, 5, 6].map((i) => (
               <details
                 key={i}
                 className="faq-item"
