@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /dataact
+
+Sitemap: https://transload.io/sitemap.xml

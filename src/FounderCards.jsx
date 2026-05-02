@@ -125,6 +125,8 @@ function FounderCards({ accent = '#f97315' }) {
               <img
                 src={founder.image}
                 alt={founder.name}
+                loading="lazy"
+                decoding="async"
                 style={{
                   position: 'relative',
                   width: 152,

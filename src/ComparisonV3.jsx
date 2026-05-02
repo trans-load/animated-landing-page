@@ -231,6 +231,8 @@ function ComparisonV3({ accent = '#f97315' }) {
                 key={k}
                 src={SIDES[k].img}
                 alt={SIDES[k].label}
+                loading="lazy"
+                decoding="async"
                 style={{
                   position: 'absolute',
                   inset: 0,

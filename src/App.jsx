@@ -107,7 +107,7 @@ function App() {
             {/* Original photo as a DOM image — no WebGL filtering or resampling. */}
             <img
               src="assets/warehouse.png?v=6"
-              alt=""
+              alt="Loading dock with pallets viewed from a ceiling-mounted security camera"
               style={{
                 position: 'absolute',
                 inset: 0,
@@ -158,38 +158,7 @@ function App() {
               transition: 'opacity 250ms ease',
             }}
           >
-            <div style={{ maxWidth: 720 }}>
-              {false && (
-                <h1
-                  style={{
-                    fontFamily: '"Inter", system-ui, sans-serif',
-                    fontWeight: 500,
-                    fontSize: 'clamp(40px, 5.6vw, 84px)',
-                    lineHeight: 1.02,
-                    letterSpacing: -1.5,
-                    margin: 0,
-                    color: '#fff',
-                    textShadow: '0 2px 30px rgba(0,0,0,0.5)',
-                    opacity: 1 - progress * 0.7,
-                  }}
-                >
-                  Turn your existing<br />
-                  security cameras<br />
-                  into{' '}
-                  <span
-                    style={{
-                      background: 'linear-gradient(90deg, #ffb070 0%, #f97315 55%, #c95808 100%)',
-                      WebkitBackgroundClip: 'text',
-                      backgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      color: 'transparent',
-                    }}
-                  >
-                    dimensioners
-                  </span>
-                </h1>
-              )}
-            </div>
+            <div style={{ maxWidth: 720 }} />
 
             {/* Right corner: tiny progress indicator */}
             <div
@@ -263,26 +232,28 @@ function App() {
                   <span style={{ color: '#6b6b6b', fontWeight: 400 }}>{t('hero.yc.backed_by')}</span>
                   <img
                     src="assets/partners/yc.png"
-                    alt="Y"
+                    alt="Y Combinator"
                     style={{ height: 16, width: 16, display: 'block', borderRadius: 3 }}
                   />
                   <span style={{ color: '#6b6b6b', fontWeight: 500 }}>Combinator</span>
                 </div>
-                <div>{t('hero.headline.line1')}</div>
-                <div style={{ marginTop: 6 }}>
-                  {t('hero.headline.into')}{' '}
-                  <span
-                    style={{
-                      background: 'linear-gradient(90deg, #ffb070 0%, #f97315 55%, #c95808 100%)',
-                      WebkitBackgroundClip: 'text',
-                      backgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      color: 'transparent',
-                    }}
-                  >
-                    {t('hero.headline.dimensioners')}
+                <h1 style={{ margin: 0, font: 'inherit', color: 'inherit', letterSpacing: 'inherit' }}>
+                  <span style={{ display: 'block' }}>{t('hero.headline.line1')}</span>
+                  <span style={{ display: 'block', marginTop: 6 }}>
+                    {t('hero.headline.into')}{' '}
+                    <span
+                      style={{
+                        background: 'linear-gradient(90deg, #ffb070 0%, #f97315 55%, #c95808 100%)',
+                        WebkitBackgroundClip: 'text',
+                        backgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        color: 'transparent',
+                      }}
+                    >
+                      {t('hero.headline.dimensioners')}
+                    </span>
                   </span>
-                </div>
+                </h1>
               </div>
             </div>
           )}
@@ -489,6 +460,8 @@ function App() {
                     <img
                       src={`assets/partners/${f}`}
                       alt=""
+                      loading="lazy"
+                      decoding="async"
                       className={`trust-logo${tone === 'light' ? ' trust-logo--light' : ''}${keepFilter ? ' trust-logo--keep' : ''}`}
                       style={{
                         height: 44 * scale,
@@ -581,9 +554,9 @@ function App() {
             }}
           >
             {[
-              { n: '01', title: t('install.step1.title'), body: t('install.step1.body') },
-              { n: '02', title: t('install.step2.title'), body: t('install.step2.body') },
-              { n: '03', title: t('install.step3.title'), body: t('install.step3.body') },
+              { n: '01', title: t('install.step1.title') },
+              { n: '02', title: t('install.step2.title') },
+              { n: '03', title: t('install.step3.title') },
             ].map((p) => (
               <div
                 key={p.n}
@@ -611,31 +584,14 @@ function App() {
                     letterSpacing: -0.3,
                     color: '#ffffff',
                     lineHeight: 1.25,
-                    marginBottom: 12,
                   }}
                 >
                   {p.title}
                 </div>
-                <div
-                  className="install-body"
-                  style={{
-                    fontFamily: '"Inter", system-ui, sans-serif',
-                    fontSize: 16,
-                    lineHeight: 1.5,
-                    color: 'rgba(255,255,255,0.68)',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                  }}
-                >
-                  {p.body}
-                </div>
               </div>
             ))}
           </div>
-          {/* Responsive: stack to 1 column on phones and drop the line-clamp
-              so body copy is fully visible. Keep the 3-column grid at tablet+. */}
+          {/* Responsive: stack to 1 column on phones. Keep the 3-column grid at tablet+. */}
           <style>{`
             @media (max-width: 860px) {
               .install-section { padding: 56px 20px 32px !important; }
@@ -643,11 +599,6 @@ function App() {
                 grid-template-columns: 1fr !important;
                 gap: 28px !important;
                 margin-top: 44px !important;
-              }
-              .install-body {
-                -webkit-line-clamp: unset !important;
-                display: block !important;
-                overflow: visible !important;
               }
             }
           `}</style>
@@ -662,6 +613,119 @@ function App() {
         if (variant === 'v3' && window.ComparisonV3) return <ComparisonV3 accent={tweaks.accent} />;
         return <Comparison accent={tweaks.accent} />;
       })()}
+
+      {/* FAQ */}
+      <section
+        id="faq"
+        className="faq-section"
+        style={{
+          padding: '112px 40px 80px',
+          background: '#0a0a0a',
+          borderTop: '1px solid rgba(255,255,255,0.06)',
+        }}
+      >
+        <div style={{ maxWidth: 880, margin: '0 auto' }}>
+          <div
+            style={{
+              fontFamily: '"JetBrains Mono", monospace',
+              fontSize: 11,
+              letterSpacing: 2.5,
+              textTransform: 'uppercase',
+              color: '#8a8a85',
+              marginBottom: 16,
+            }}
+          >
+            {t('faq.eyebrow')}
+          </div>
+          <h2
+            style={{
+              fontFamily: '"Inter", system-ui, sans-serif',
+              fontWeight: 500,
+              fontSize: 'clamp(34px, 4.2vw, 56px)',
+              lineHeight: 1.08,
+              letterSpacing: -1.2,
+              margin: 0,
+              marginBottom: 48,
+              color: '#ffffff',
+            }}
+          >
+            {t('faq.headline')}
+          </h2>
+          <div>
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <details
+                key={i}
+                className="faq-item"
+                style={{
+                  borderTop: '1px solid rgba(255,255,255,0.12)',
+                  padding: '20px 0',
+                }}
+              >
+                <summary
+                  style={{
+                    cursor: 'pointer',
+                    listStyle: 'none',
+                    fontFamily: '"Inter", system-ui, sans-serif',
+                    fontSize: 19,
+                    fontWeight: 500,
+                    letterSpacing: -0.3,
+                    color: '#ffffff',
+                    lineHeight: 1.35,
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    justifyContent: 'space-between',
+                    gap: 24,
+                  }}
+                >
+                  <span>{t(`faq.q${i}.q`)}</span>
+                  <span
+                    aria-hidden="true"
+                    className="faq-marker"
+                    style={{
+                      flexShrink: 0,
+                      width: 22,
+                      height: 22,
+                      borderRadius: '50%',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 16,
+                      lineHeight: 1,
+                      color: 'rgba(255,255,255,0.7)',
+                      marginTop: 2,
+                    }}
+                  >
+                    +
+                  </span>
+                </summary>
+                <div
+                  style={{
+                    fontFamily: '"Inter", system-ui, sans-serif',
+                    fontSize: 16,
+                    lineHeight: 1.55,
+                    color: 'rgba(255,255,255,0.72)',
+                    marginTop: 14,
+                    maxWidth: 720,
+                  }}
+                >
+                  {t(`faq.q${i}.a`)}
+                </div>
+              </details>
+            ))}
+          </div>
+          <style>{`
+            .faq-item summary::-webkit-details-marker { display: none; }
+            .faq-item[open] .faq-marker { background: #f97315; border-color: #f97315; color: #0a0a0a; }
+            .faq-item[open] .faq-marker::before { content: '–'; }
+            .faq-item[open] .faq-marker { font-size: 0; }
+            .faq-item[open] .faq-marker::before { font-size: 16px; }
+            @media (max-width: 720px) {
+              .faq-section { padding: 64px 20px 48px !important; }
+            }
+          `}</style>
+        </div>
+      </section>
 
       {/* Founder contact cards */}
       <FounderCards accent={tweaks.accent} />
