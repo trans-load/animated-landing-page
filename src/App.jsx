@@ -106,7 +106,7 @@ function App() {
           >
             {/* Original photo as a DOM image — no WebGL filtering or resampling. */}
             <img
-              src="assets/warehouse.png?v=6"
+              src="assets/warehouse.webp?v=1"
               alt="Loading dock with pallets viewed from a ceiling-mounted security camera"
               style={{
                 position: 'absolute',

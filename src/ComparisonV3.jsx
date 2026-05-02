@@ -33,7 +33,7 @@ function ComparisonV3({ accent = '#f97315' }) {
     past: {
       label: t('comparison.past.label'),
       sublabel: t('comparison.past.sublabel'),
-      img: 'assets/past-dimensioner.png',
+      img: 'assets/past-dimensioner.webp',
       rows: [t('comparison.past.row1'), t('comparison.past.row2'), t('comparison.past.row3')],
       tag: '01 / BEFORE',
       corner: 'MANUAL',
@@ -41,7 +41,7 @@ function ComparisonV3({ accent = '#f97315' }) {
     now: {
       label: t('comparison.now.label'),
       sublabel: t('comparison.now.sublabel'),
-      img: 'assets/now-highlighted.png',
+      img: 'assets/now-highlighted.webp',
       rows: [t('comparison.now.row1'), t('comparison.now.row2'), t('comparison.now.row3')],
       tag: '02 / NOW',
       corner: 'LIVE',

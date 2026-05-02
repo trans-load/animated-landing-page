@@ -196,7 +196,7 @@ function PointCloud({
     geom.setAttribute('position', new THREE.BufferAttribute(pos3D, 3));
 
     // ---- Texture (sampled by the point cloud to color each point from the image)
-    const tex = new THREE.TextureLoader().load('assets/warehouse.png?v=6');
+    const tex = new THREE.TextureLoader().load('assets/warehouse.webp?v=1');
     if ('SRGBColorSpace' in THREE) tex.colorSpace = THREE.SRGBColorSpace;
     else if ('sRGBEncoding' in THREE) tex.encoding = THREE.sRGBEncoding;
     tex.minFilter = THREE.LinearFilter;
@@ -206,7 +206,7 @@ function PointCloud({
     tex.flipY = false;
     // Dedicated texture for the backdrop so we can orient it independently
     // of the point-cloud color sampling.
-    const bgTex = new THREE.TextureLoader().load('assets/warehouse.png?v=6');
+    const bgTex = new THREE.TextureLoader().load('assets/warehouse.webp?v=1');
     if ('SRGBColorSpace' in THREE) bgTex.colorSpace = THREE.SRGBColorSpace;
     else if ('sRGBEncoding' in THREE) bgTex.encoding = THREE.sRGBEncoding;
     bgTex.minFilter = THREE.LinearFilter;
