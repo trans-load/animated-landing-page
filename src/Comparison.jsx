@@ -244,6 +244,8 @@ function Card({ side, label, sublabel, img, rows, accent, inView, delay }) {
         <img
           src={img}
           alt={label}
+          loading="lazy"
+          decoding="async"
           style={{
             width: '100%',
             height: '100%',

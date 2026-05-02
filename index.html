@@ -6,6 +6,130 @@
 <link rel="icon" type="image/png" href="assets/favicon.png" />
 <link rel="apple-touch-icon" href="assets/favicon.png" />
 <title>transload — Computer vision for the loading dock</title>
+<meta name="description" content="transload turns your existing security cameras into a 3D dimensioner for the loading dock — measure pallets, parcels, and shipments with no new hardware." />
+<link rel="canonical" href="https://transload.io/" />
+<link rel="alternate" hreflang="en" href="https://transload.io/" />
+<link rel="alternate" hreflang="de" href="https://transload.io/?lang=de" />
+<link rel="alternate" hreflang="x-default" href="https://transload.io/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="transload" />
+<meta property="og:url" content="https://transload.io/" />
+<meta property="og:title" content="transload — Computer vision for the loading dock" />
+<meta property="og:description" content="Turn your existing security cameras into a 3D dimensioner for the loading dock. No new hardware." />
+<meta property="og:image" content="https://transload.io/assets/warehouse.png" />
+<meta property="og:image:width" content="1512" />
+<meta property="og:image:height" content="840" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:locale:alternate" content="de_DE" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="transload — Computer vision for the loading dock" />
+<meta name="twitter:description" content="Turn your existing security cameras into a 3D dimensioner for the loading dock. No new hardware." />
+<meta name="twitter:image" content="https://transload.io/assets/warehouse.png" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "transload",
+  "legalName": "transload GmbH",
+  "url": "https://transload.io/",
+  "logo": "https://transload.io/assets/logo-default.png",
+  "image": "https://transload.io/assets/warehouse.png",
+  "description": "Computer vision that turns existing security cameras into 3D dimensioners for the loading dock.",
+  "email": "contact@transload.io",
+  "telephone": "+49-152-5854-9146",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Hohenzollernstr. 105",
+    "postalCode": "80796",
+    "addressLocality": "München",
+    "addressCountry": "DE"
+  },
+  "founder": [
+    { "@type": "Person", "name": "Jago Wahl-Schwentker" },
+    { "@type": "Person", "name": "Nils Börner" },
+    { "@type": "Person", "name": "Julius Scheel" }
+  ],
+  "sameAs": [
+    "https://www.ycombinator.com/companies/transload"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Does transload work with our existing cameras?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. transload runs on standard IP cameras you already have — Axis, Hikvision, Bosch, Dahua, Hanwha, and most others. No new hardware is required."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How accurate are the dimensions?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "transload measures pallets and parcels with accuracy comparable to legacy dimensioner stations, and it covers every shipment in the terminal — not just samples."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long does setup take?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A typical rollout is days, not weeks. Because it is software-only, we connect to your WMS or TMS, calibrate against the camera positions, and you are live."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does it integrate with our WMS or TMS?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Dimensions are linked to license plate numbers via scan timestamps and pushed into your WMS, TMS, or ERP through a standard integration."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does transload handle data protection?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "transload processes data in line with the applicable local data-protection requirements — GDPR for European customers, and the equivalent frameworks elsewhere."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do drivers or forklift operators need to change anything?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Measurement runs in the background on the cameras you already operate. There are no detours to a dimensioner station and no waiting at a measuring booth."
+      }
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "transload",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "url": "https://transload.io/",
+  "description": "Camera-based 3D dimensioning software for logistics terminals — measures pallets, parcels, and shipments using existing security cameras.",
+  "publisher": {
+    "@type": "Organization",
+    "name": "transload",
+    "url": "https://transload.io/"
+  },
+  "offers": {
+    "@type": "Offer",
+    "url": "https://transload.io/#book-demo"
+  }
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -14,7 +138,7 @@
   html { scroll-behavior: smooth; }
   /* Account for the fixed header when jumping to an anchor so section
      eyebrows don't disappear under the pill. */
-  #install, #comparison, #founders, #book-demo { scroll-margin-top: 88px; }
+  #install, #comparison, #founders, #faq, #book-demo { scroll-margin-top: 88px; }
   html, body { margin: 0; padding: 0; background: #0a0a0a; }
   body {
     font-family: "Inter", system-ui, -apple-system, sans-serif;

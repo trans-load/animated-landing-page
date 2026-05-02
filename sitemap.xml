@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://transload.io/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://transload.io/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://transload.io/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://transload.io/" />
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://transload.io/imprint/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://transload.io/imprint/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://transload.io/imprint/?lang=de" />
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://transload.io/privacy-policy/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://transload.io/privacy-policy/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://transload.io/privacy-policy/?lang=de" />
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://transload.io/gdpr/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://transload.io/gdpr/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://transload.io/gdpr/?lang=de" />
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+</urlset>

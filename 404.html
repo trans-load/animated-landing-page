@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="/assets/favicon.png" />
+<link rel="apple-touch-icon" href="/assets/favicon.png" />
+<title>Page not found — transload</title>
+<meta name="description" content="The page you were looking for does not exist." />
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #0a0a0a; }
+  body {
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+  ::selection { background: #f97315; color: #0a0a0a; }
+  .wrap { max-width: 560px; text-align: center; }
+  .code {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: #8a8a85;
+    margin-bottom: 24px;
+  }
+  h1 {
+    font-weight: 500;
+    font-size: clamp(40px, 6vw, 72px);
+    line-height: 1.05;
+    letter-spacing: -1.5px;
+    margin: 0 0 20px;
+  }
+  h1 .accent {
+    background: linear-gradient(90deg, #ffb070 0%, #f97315 55%, #c95808 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  p {
+    color: rgba(255,255,255,0.7);
+    font-size: 17px;
+    line-height: 1.5;
+    margin: 0 0 32px;
+  }
+  a.cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    border-radius: 999px;
+    background: #f97315;
+    color: #0a0a0a;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 15px;
+    transition: transform 200ms ease, background 200ms ease;
+  }
+  a.cta:hover { background: #ffb070; transform: translateY(-1px); }
+</style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="code">Error 404</div>
+    <h1>This page is <span class="accent">off the grid</span>.</h1>
+    <p>The page you were looking for does not exist or has moved.</p>
+    <a class="cta" href="/">Back to transload.io</a>
+  </main>
+</body>
+</html>
