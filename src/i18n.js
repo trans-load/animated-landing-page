@@ -69,6 +69,8 @@
       'faq.q5.a': 'transload processes data in line with the applicable local data-protection requirements — GDPR for European customers, and the equivalent frameworks elsewhere.',
       'faq.q6.q': 'Do drivers or forklift operators need to change anything?',
       'faq.q6.a': 'No. Measurement runs in the background on the cameras you already operate. There are no detours to a dimensioner station and no waiting at a measuring booth.',
+      'faq.q7.q': 'How does transload compare to Cubiscan, Mettler-Toledo, FreightSnap, CargoSpectre, or Dockware?',
+      'faq.q7.a': 'Traditional dimensioning systems — Cubiscan, Mettler-Toledo, FreightSnap, CargoSpectre, and Dockware — require a dedicated measuring station that every pallet or parcel has to be routed through. transload measures every shipment in the background using the security cameras you already have, with no detours, no waiting, and no new hardware.',
     },
     de: {
       'nav.installation': 'Anbindung',
@@ -133,6 +135,8 @@
       'faq.q5.a': 'transload verarbeitet Daten gemäß den jeweils geltenden lokalen Datenschutzanforderungen — DSGVO für europäische Kunden und die entsprechenden Regelwerke in anderen Regionen.',
       'faq.q6.q': 'Müssen Fahrer oder Staplerfahrer ihren Ablauf ändern?',
       'faq.q6.a': 'Nein. Die Vermessung läuft im Hintergrund auf den Kameras, die Sie bereits betreiben. Keine Umwege zur Messstation, kein Warten am Messgerät.',
+      'faq.q7.q': 'Wie unterscheidet sich transload von Cubiscan, Mettler-Toledo, FreightSnap, CargoSpectre oder Dockware?',
+      'faq.q7.a': 'Klassische Dimensionierungssysteme — Cubiscan, Mettler-Toledo, FreightSnap, CargoSpectre und Dockware — benötigen eine dedizierte Messstation, durch die jede Palette und jedes Packstück geleitet werden muss. transload misst jede Sendung im Hintergrund über die Sicherheitskameras, die Sie bereits einsetzen — ohne Umwege, ohne Wartezeit und ohne neue Hardware.',
     },
   };
 
