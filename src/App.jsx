@@ -217,10 +217,10 @@ function App() {
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: 8,
+                    gap: 10,
                     padding: '5px 12px 5px 9px',
                     borderRadius: 999,
-                    background: 'rgba(255,255,255,0.92)',
+                    background: '#ffffff',
                     border: '1px solid rgba(0,0,0,0.06)',
                     boxShadow: '0 4px 14px rgba(0,0,0,0.35)',
                     fontSize: 12.5,
@@ -231,11 +231,10 @@ function App() {
                 >
                   <span style={{ color: '#6b6b6b', fontWeight: 400 }}>{t('hero.yc.backed_by')}</span>
                   <img
-                    src="assets/partners/yc.png"
+                    src="assets/yc-logo-expanded-orange.png"
                     alt="Y Combinator"
-                    style={{ height: 16, width: 16, display: 'block', borderRadius: 3 }}
+                    style={{ height: 16, width: 'auto', display: 'block', borderRadius: 0 }}
                   />
-                  <span style={{ color: '#6b6b6b', fontWeight: 500 }}>Combinator</span>
                 </div>
                 <h1 style={{ margin: 0, font: 'inherit', color: 'inherit', letterSpacing: 'inherit' }}>
                   <span style={{ display: 'block' }}>{t('hero.headline.line1')}</span>

@@ -45,10 +45,10 @@ function Header({ accent = '#f97315', scrolled = false }) {
             pointerEvents: 'auto',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: 8,
+            gap: 10,
             padding: '5px 12px 5px 9px',
             borderRadius: 999,
-            background: 'rgba(255,255,255,0.92)',
+            background: '#ffffff',
             backdropFilter: 'blur(10px)',
             WebkitBackdropFilter: 'blur(10px)',
             border: '1px solid rgba(0,0,0,0.06)',
@@ -61,11 +61,10 @@ function Header({ accent = '#f97315', scrolled = false }) {
         >
           <span style={{ color: '#6b6b6b', fontWeight: 400 }}>Backed by</span>
           <img
-            src="assets/partners/yc.png"
+            src="assets/yc-logo-expanded-orange.png"
             alt="Y Combinator"
-            style={{ height: 15, width: 15, display: 'block', borderRadius: 2 }}
+            style={{ height: 14, width: 'auto', display: 'block', borderRadius: 0 }}
           />
-          <span style={{ color: '#6b6b6b', fontWeight: 500 }}>Combinator</span>
         </div>
       )}
       <div
