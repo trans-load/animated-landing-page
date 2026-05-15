@@ -42,7 +42,11 @@ function App() {
 
   // Scroll progress: hero is sticky, drives 0..1 over its scroll range
   useEffectApp(() => {
-    const onScroll = () => {
+    let rafId = 0;
+    let scheduled = false;
+    const compute = () => {
+      scheduled = false;
+      rafId = 0;
       const el = heroRef.current;
       if (!el) return;
       const rect = el.getBoundingClientRect();
@@ -56,9 +60,17 @@ function App() {
       // once the user has scrolled past the hero section entirely.
       setHeroInView(rect.bottom > 80);
     };
+    const onScroll = () => {
+      if (scheduled) return;
+      scheduled = true;
+      rafId = requestAnimationFrame(compute);
+    };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   // Computed visibility / opacities
