@@ -239,7 +239,7 @@ function App() {
                 <h1 style={{ margin: 0, font: 'inherit', color: 'inherit', letterSpacing: 'inherit' }}>
                   <span style={{ display: 'block' }}>{t('hero.headline.line1')}</span>
                   <span style={{ display: 'block', marginTop: 6 }}>
-                    {t('hero.headline.into')}{' '}
+                    {t('hero.headline.into') && <>{t('hero.headline.into')}{' '}</>}
                     <span
                       style={{
                         background: 'linear-gradient(90deg, #ffb070 0%, #f97315 55%, #c95808 100%)',
@@ -518,87 +518,241 @@ function App() {
         id="install"
         className="install-section"
         style={{
-          padding: '112px 40px 80px',
+          padding: '112px 40px 96px',
           background: '#0a0a0a',
           borderTop: '1px solid rgba(255,255,255,0.06)',
         }}
       >
-        <div style={{ maxWidth: 1180, margin: '0 auto' }}>
+        <div style={{ maxWidth: 1240, margin: '0 auto' }}>
           <h2
             style={{
               fontFamily: '"Inter", system-ui, sans-serif',
               fontWeight: 500,
-              fontSize: 'clamp(34px, 4.2vw, 64px)',
+              fontSize: 'clamp(34px, 4.2vw, 56px)',
               lineHeight: 1.08,
               letterSpacing: -1.2,
-              margin: '0 auto',
-              maxWidth: 980,
-              textAlign: 'center',
+              margin: 0,
               color: '#ffffff',
             }}
           >
-            {t('install.headline.line1')}<br />
-            {t('install.headline.line2')}<br />
-            <span style={{ color: '#8a8a85' }}>{t('install.headline.line3')}</span>
+            {t('install.headline.line1')}
+            {t('install.headline.line2') && <><br />{t('install.headline.line2')}</>}
+            {t('install.headline.line3') && <><br /><span style={{ color: '#8a8a85' }}>{t('install.headline.line3')}</span></>}
           </h2>
 
           <div
             className="install-grid"
             style={{
-              marginTop: 96,
+              marginTop: 64,
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: 56,
-              alignItems: 'start',
+              gap: 28,
+              alignItems: 'stretch',
             }}
           >
             {[
-              { n: '01', title: t('install.step1.title') },
-              { n: '02', title: t('install.step2.title') },
-              { n: '03', title: t('install.step3.title') },
-            ].map((p) => (
-              <div
-                key={p.n}
-                style={{
-                  borderTop: '1px solid rgba(255,255,255,0.14)',
-                  paddingTop: 20,
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: '"JetBrains Mono", monospace',
-                    fontSize: 12,
-                    color: 'rgba(255,255,255,0.45)',
-                    marginBottom: 14,
-                    letterSpacing: 0.5,
-                  }}
+              {
+                n: '01',
+                title: t('install.step1.title'),
+                desc: t('install.step1.desc'),
+                cta: t('install.step1.cta'),
+                anchor: t('install.step1.anchor'),
+              },
+              {
+                n: '02',
+                title: t('install.step2.title'),
+                desc: t('install.step2.desc'),
+                cta: t('install.step2.cta'),
+                anchor: t('install.step2.anchor'),
+              },
+              {
+                n: '03',
+                title: t('install.step3.title'),
+                desc: t('install.step3.desc'),
+                cta: t('install.step3.cta'),
+                anchor: t('install.step3.anchor'),
+              },
+            ].map((p) => {
+              const isLink = lang === 'en' && p.anchor;
+              const Tag = isLink ? 'a' : 'div';
+              return (
+                <Tag
+                  key={p.n}
+                  {...(isLink ? { href: p.anchor } : {})}
+                  className="install-card"
                 >
-                  {p.n}
-                </div>
-                <div
-                  style={{
-                    fontFamily: '"Inter", system-ui, sans-serif',
-                    fontSize: 20,
-                    fontWeight: 500,
-                    letterSpacing: -0.3,
-                    color: '#ffffff',
-                    lineHeight: 1.25,
-                  }}
-                >
-                  {p.title}
-                </div>
-              </div>
-            ))}
+                  <span className="install-card-num">{p.n}</span>
+                  <div className="install-card-title">{p.title}</div>
+                  {p.desc && <div className="install-card-desc">{p.desc}</div>}
+                  {isLink && p.cta && (
+                    <span className="install-card-cta" style={{ color: tweaks.accent }}>
+                      {p.cta}
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M5 12h14M13 6l6 6-6 6" />
+                      </svg>
+                    </span>
+                  )}
+                </Tag>
+              );
+            })}
           </div>
-          {/* Responsive: stack to 1 column on phones. Keep the 3-column grid at tablet+. */}
+          {/* Card styling + responsive: stack to 1 column on phones. */}
           <style>{`
+            .install-card {
+              position: relative;
+              display: flex;
+              flex-direction: column;
+              padding: 40px 36px 34px;
+              min-height: 340px;
+              border-radius: 22px;
+              background:
+                radial-gradient(140% 90% at 0% 0%, rgba(249,115,21,0.10) 0%, rgba(249,115,21,0) 55%),
+                radial-gradient(120% 100% at 100% 100%, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0) 60%),
+                linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 100%);
+              box-shadow:
+                0 1px 0 rgba(255,255,255,0.07) inset,
+                0 0 0 1px rgba(255,255,255,0.10),
+                0 24px 56px rgba(0,0,0,0.55),
+                0 6px 14px rgba(0,0,0,0.35),
+                0 10px 40px rgba(249,115,21,0.06);
+              text-decoration: none;
+              color: inherit;
+              transition: transform 380ms cubic-bezier(0.2, 0.7, 0.2, 1), background 380ms ease, box-shadow 380ms ease;
+              overflow: hidden;
+            }
+            .install-card::before {
+              content: '';
+              position: absolute;
+              left: 12%;
+              right: 12%;
+              top: 0;
+              height: 2px;
+              border-radius: 0 0 6px 6px;
+              background: linear-gradient(90deg, rgba(249,115,21,0) 0%, rgba(249,115,21,0.55) 50%, rgba(249,115,21,0) 100%);
+              opacity: 0.7;
+              transition: opacity 380ms ease, height 380ms ease, background 380ms ease, left 380ms ease, right 380ms ease;
+            }
+            .install-card::after {
+              content: '';
+              position: absolute;
+              inset: 0;
+              border-radius: 22px;
+              padding: 1px;
+              background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0.02) 100%);
+              -webkit-mask:
+                linear-gradient(#000 0 0) content-box,
+                linear-gradient(#000 0 0);
+              -webkit-mask-composite: xor;
+                      mask-composite: exclude;
+              pointer-events: none;
+              transition: background 380ms ease;
+            }
+            a.install-card:hover {
+              transform: translateY(-8px);
+              background:
+                radial-gradient(140% 90% at 0% 0%, rgba(249,115,21,0.22) 0%, rgba(249,115,21,0) 55%),
+                radial-gradient(120% 100% at 100% 100%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 60%),
+                linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+              box-shadow:
+                0 1px 0 rgba(255,255,255,0.10) inset,
+                0 0 0 1px rgba(249,115,21,0.40),
+                0 36px 80px rgba(0,0,0,0.65),
+                0 10px 24px rgba(0,0,0,0.45),
+                0 12px 50px rgba(249,115,21,0.30);
+            }
+            a.install-card:hover::before {
+              left: 0;
+              right: 0;
+              height: 3px;
+              opacity: 1;
+              background: linear-gradient(90deg, rgba(249,115,21,0) 0%, rgba(249,115,21,1) 50%, rgba(249,115,21,0) 100%);
+            }
+            a.install-card:hover::after {
+              background: linear-gradient(180deg, rgba(249,115,21,0.55) 0%, rgba(255,255,255,0.08) 60%, rgba(255,255,255,0.02) 100%);
+            }
+            .install-card-num {
+              position: relative;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              width: 44px;
+              height: 44px;
+              border-radius: 999px;
+              border: 1px solid rgba(249,115,21,0.55);
+              background:
+                radial-gradient(circle at 30% 30%, rgba(249,115,21,0.28), rgba(249,115,21,0.06) 70%);
+              box-shadow:
+                0 0 0 1px rgba(249,115,21,0.18),
+                0 6px 16px rgba(249,115,21,0.18),
+                0 0 24px rgba(249,115,21,0.20) inset;
+              font-family: "JetBrains Mono", monospace;
+              font-size: 14px;
+              font-weight: 600;
+              letter-spacing: 0.5px;
+              color: #ffb070;
+              margin-bottom: 26px;
+              transition: transform 380ms ease, box-shadow 380ms ease, background 380ms ease, color 380ms ease;
+            }
+            a.install-card:hover .install-card-num {
+              transform: scale(1.06);
+              color: #fff;
+              background:
+                radial-gradient(circle at 30% 30%, rgba(249,115,21,1), rgba(249,115,21,0.7) 70%);
+              border-color: rgba(249,115,21,0.9);
+              box-shadow:
+                0 0 0 1px rgba(249,115,21,0.4),
+                0 10px 28px rgba(249,115,21,0.5),
+                0 0 30px rgba(249,115,21,0.25) inset;
+            }
+            .install-card-title {
+              font-family: "Inter", system-ui, sans-serif;
+              font-size: 26px;
+              font-weight: 500;
+              letter-spacing: -0.5px;
+              color: #fff;
+              line-height: 1.2;
+              margin-bottom: 16px;
+            }
+            .install-card-desc {
+              font-family: "Inter", system-ui, sans-serif;
+              font-size: 16px;
+              line-height: 1.55;
+              color: rgba(255,255,255,0.65);
+              margin-bottom: 28px;
+              flex: 1;
+            }
+            .install-card-cta {
+              display: inline-flex;
+              align-items: center;
+              gap: 8px;
+              font-family: "JetBrains Mono", monospace;
+              font-size: 12px;
+              letter-spacing: 1.6px;
+              text-transform: uppercase;
+              opacity: 0.92;
+              margin-top: auto;
+            }
+            .install-card-cta svg {
+              width: 16px;
+              height: 16px;
+              transition: transform 240ms ease;
+            }
+            a.install-card:hover .install-card-cta svg {
+              transform: translateX(5px);
+            }
             @media (max-width: 860px) {
-              .install-section { padding: 56px 20px 32px !important; }
+              .install-section { padding: 56px 20px 40px !important; }
               .install-grid {
                 grid-template-columns: 1fr !important;
-                gap: 28px !important;
+                gap: 16px !important;
                 margin-top: 44px !important;
               }
+              .install-card {
+                padding: 28px 26px 26px;
+                min-height: 0;
+              }
+              .install-card-title { font-size: 22px; }
+              .install-card-desc { font-size: 15px; }
             }
           `}</style>
 
@@ -613,17 +767,21 @@ function App() {
         return <Comparison accent={tweaks.accent} />;
       })()}
 
+      {/* Search & reveal — tracking number → segmentation highlight.
+          EN-only for now; the DE version of the page stays unchanged. */}
+      {window.TrackingLookup && lang === 'en' && <TrackingLookup accent={tweaks.accent} />}
+
       {/* FAQ */}
       <section
         id="faq"
         className="faq-section"
         style={{
-          padding: '112px 40px 80px',
+          padding: '112px 40px 96px',
           background: '#0a0a0a',
           borderTop: '1px solid rgba(255,255,255,0.06)',
         }}
       >
-        <div style={{ maxWidth: 880, margin: '0 auto' }}>
+        <div style={{ maxWidth: 1240, margin: '0 auto' }}>
           <div
             style={{
               fontFamily: '"JetBrains Mono", monospace',
@@ -644,14 +802,14 @@ function App() {
               lineHeight: 1.08,
               letterSpacing: -1.2,
               margin: 0,
-              marginBottom: 48,
+              marginBottom: 64,
               color: '#ffffff',
             }}
           >
             {t('faq.headline')}
           </h2>
           <div>
-            {[1, 3, 4, 5, 6].map((i) => (
+            {[1, 2, 3, 4, 5, 6].map((i) => (
               <details
                 key={i}
                 className="faq-item"
@@ -677,26 +835,23 @@ function App() {
                   }}
                 >
                   <span>{t(`faq.q${i}.q`)}</span>
-                  <span
+                  <svg
                     aria-hidden="true"
                     className="faq-marker"
-                    style={{
-                      flexShrink: 0,
-                      width: 22,
-                      height: 22,
-                      borderRadius: '50%',
-                      border: '1px solid rgba(255,255,255,0.3)',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 16,
-                      lineHeight: 1,
-                      color: 'rgba(255,255,255,0.7)',
-                      marginTop: 2,
-                    }}
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    style={{ flexShrink: 0, marginTop: 4 }}
                   >
-                    +
-                  </span>
+                    <path
+                      d="M6 9l6 6 6-6"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </summary>
                 <div
                   style={{
@@ -705,7 +860,7 @@ function App() {
                     lineHeight: 1.55,
                     color: 'rgba(255,255,255,0.72)',
                     marginTop: 14,
-                    maxWidth: 720,
+                    maxWidth: 820,
                   }}
                 >
                   {t(`faq.q${i}.a`)}
@@ -715,10 +870,14 @@ function App() {
           </div>
           <style>{`
             .faq-item summary::-webkit-details-marker { display: none; }
-            .faq-item[open] .faq-marker { background: #f97315; border-color: #f97315; color: #0a0a0a; }
-            .faq-item[open] .faq-marker::before { content: '–'; }
-            .faq-item[open] .faq-marker { font-size: 0; }
-            .faq-item[open] .faq-marker::before { font-size: 16px; }
+            .faq-marker {
+              color: rgba(255,255,255,0.55);
+              transition: transform 200ms ease, color 200ms ease;
+            }
+            .faq-item[open] .faq-marker {
+              transform: rotate(180deg);
+              color: #f97315;
+            }
             @media (max-width: 720px) {
               .faq-section { padding: 64px 20px 48px !important; }
             }
