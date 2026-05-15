@@ -58,22 +58,20 @@ function BookDemo() {
       id="book-demo"
       className="bookdemo-section"
       style={{
-        padding: '112px 40px 128px',
+        padding: '112px 40px 96px',
         background: '#0a0a0a',
         borderTop: '1px solid rgba(255,255,255,0.06)',
       }}
     >
-      <div style={{ maxWidth: 1180, margin: '0 auto' }}>
+      <div style={{ maxWidth: 1240, margin: '0 auto' }}>
         <h2
           style={{
             fontFamily: '"Inter", system-ui, sans-serif',
             fontWeight: 500,
-            fontSize: 'clamp(34px, 4.2vw, 64px)',
+            fontSize: 'clamp(34px, 4.2vw, 56px)',
             lineHeight: 1.08,
             letterSpacing: -1.2,
-            margin: '0 auto 72px',
-            maxWidth: 960,
-            textAlign: 'center',
+            margin: '0 0 64px',
             color: '#ffffff',
           }}
         >

@@ -32,7 +32,7 @@ function FounderCards({ accent = '#f97315' }) {
       style={{
         position: 'relative',
         overflow: 'hidden',
-        padding: '96px 40px 112px',
+        padding: '112px 40px 96px',
         background:
           'radial-gradient(circle at 50% 0%, rgba(249,115,21,0.12), rgba(10,10,10,0) 34%), #0a0a0a',
         borderTop: '1px solid rgba(255,255,255,0.06)',
@@ -78,9 +78,9 @@ function FounderCards({ accent = '#f97315' }) {
             style={{
               fontFamily: '"Inter", system-ui, sans-serif',
               fontWeight: 500,
-              fontSize: 'clamp(34px, 4vw, 58px)',
+              fontSize: 'clamp(34px, 4.2vw, 56px)',
               lineHeight: 1.08,
-              letterSpacing: -1.1,
+              letterSpacing: -1.2,
               margin: 0,
               color: '#fff',
             }}

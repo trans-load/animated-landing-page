@@ -6,7 +6,7 @@ const { useRef: useRefCmp, useEffect: useEffectCmp, useState: useStateCmp } = Re
 function Comparison({ accent = '#f97315' }) {
   const mono = '"JetBrains Mono", monospace';
   const sans = '"Inter", system-ui, -apple-system, sans-serif';
-  const { t } = window.useT();
+  const { t, lang } = window.useT();
 
   const sectionRef = useRefCmp(null);
   const [inView, setInView] = useStateCmp(false);
@@ -68,39 +68,55 @@ function Comparison({ accent = '#f97315' }) {
 
       <div style={{ maxWidth: 1240, margin: '0 auto', position: 'relative' }}>
         {/* Eyebrow + heading */}
-        <div style={{ textAlign: 'center', marginBottom: 88 }}>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 10,
-              fontFamily: mono,
-              fontSize: 11,
-              letterSpacing: 2.5,
-              textTransform: 'uppercase',
-              color: accent,
-              marginBottom: 20,
-            }}
-          >
-            <span style={{ width: 24, height: 1, background: accent, opacity: 0.6 }} />
-            {t('comparison.eyebrow')}
-            <span style={{ width: 24, height: 1, background: accent, opacity: 0.6 }} />
-          </div>
+        <div style={{ textAlign: 'left', marginBottom: 64 }}>
+          {lang !== 'en' && (
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 10,
+                fontFamily: mono,
+                fontSize: 11,
+                letterSpacing: 2.5,
+                textTransform: 'uppercase',
+                color: accent,
+                marginBottom: 20,
+              }}
+            >
+              <span style={{ width: 24, height: 1, background: accent, opacity: 0.6 }} />
+              {t('comparison.eyebrow')}
+              <span style={{ width: 24, height: 1, background: accent, opacity: 0.6 }} />
+            </div>
+          )}
           <h2
             style={{
               fontFamily: sans,
               fontWeight: 500,
-              fontSize: 'clamp(34px, 4.4vw, 60px)',
-              lineHeight: 1.02,
+              fontSize: 'clamp(34px, 4.2vw, 56px)',
+              lineHeight: 1.08,
               letterSpacing: -1.2,
               margin: 0,
               color: '#fff',
-              maxWidth: 900,
-              marginLeft: 'auto',
-              marginRight: 'auto',
             }}
           >
-            {t('comparison.headline')}
+            {lang === 'en' ? (
+              <>
+                Dimensions for all shipments{' '}
+                <span
+                  style={{
+                    background: 'linear-gradient(90deg, #ffb070 0%, #f97315 55%, #c95808 100%)',
+                    WebkitBackgroundClip: 'text',
+                    backgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    color: 'transparent',
+                  }}
+                >
+                  in-motion
+                </span>
+              </>
+            ) : (
+              t('comparison.headline')
+            )}
           </h2>
         </div>
 
@@ -118,7 +134,6 @@ function Comparison({ accent = '#f97315' }) {
           <Card
             side="past"
             label={t('comparison.past.label')}
-            sublabel={t('comparison.past.sublabel')}
             img="assets/past-dimensioner.png"
             rows={pastRows}
             accent={accent}
@@ -131,7 +146,6 @@ function Comparison({ accent = '#f97315' }) {
           <Card
             side="now"
             label={t('comparison.now.label')}
-            sublabel={t('comparison.now.sublabel')}
             img="assets/now-highlighted.png"
             rows={nowRows}
             accent={accent}
@@ -157,8 +171,7 @@ function Comparison({ accent = '#f97315' }) {
   );
 }
 
-function Card({ side, label, sublabel, img, rows, accent, inView, delay }) {
-  const mono = '"JetBrains Mono", monospace';
+function Card({ side, label, img, rows, accent, inView, delay }) {
   const sans = '"Inter", system-ui, -apple-system, sans-serif';
   const isNow = side === 'now';
 
@@ -172,59 +185,18 @@ function Card({ side, label, sublabel, img, rows, accent, inView, delay }) {
         flexDirection: 'column',
       }}
     >
-      {/* Tag strip on top */}
+      {/* Label only — the image's own treatment carries the past/now contrast. */}
       <div
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          marginBottom: 18,
-          paddingLeft: 2,
+          fontFamily: sans,
+          fontSize: 28,
+          fontWeight: 600,
+          color: isNow ? '#fff' : 'rgba(255,255,255,0.92)',
+          letterSpacing: -0.6,
+          marginBottom: 22,
         }}
       >
-        <div
-          style={{
-            fontFamily: mono,
-            fontSize: 10,
-            letterSpacing: 2,
-            textTransform: 'uppercase',
-            color: isNow ? accent : 'rgba(255,255,255,0.4)',
-            padding: '6px 10px',
-            borderRadius: 4,
-            border: isNow ? `1px solid ${accent}66` : '1px solid rgba(255,255,255,0.12)',
-            background: isNow ? `${accent}12` : 'rgba(255,255,255,0.02)',
-          }}
-        >
-          {isNow ? '02 / NOW' : '01 / BEFORE'}
-        </div>
-        <div style={{ flex: 1, height: 1, background: isNow ? `${accent}33` : 'rgba(255,255,255,0.08)' }} />
-      </div>
-
-      {/* Label + sublabel */}
-      <div style={{ marginBottom: 22 }}>
-        <div
-          style={{
-            fontFamily: sans,
-            fontSize: 28,
-            fontWeight: 600,
-            color: isNow ? '#fff' : 'rgba(255,255,255,0.92)',
-            letterSpacing: -0.6,
-            marginBottom: 4,
-          }}
-        >
-          {label}
-        </div>
-        <div
-          style={{
-            fontFamily: sans,
-            fontSize: 15,
-            fontWeight: 400,
-            color: isNow ? accent : 'rgba(255,255,255,0.42)',
-            letterSpacing: -0.1,
-          }}
-        >
-          {sublabel}
-        </div>
+        {label}
       </div>
 
       {/* Image block */}
@@ -267,39 +239,6 @@ function Card({ side, label, sublabel, img, rows, accent, inView, delay }) {
             pointerEvents: 'none',
           }}
         />
-        {/* Corner micro-mark */}
-        <div
-          style={{
-            position: 'absolute',
-            top: 14,
-            left: 14,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            fontFamily: mono,
-            fontSize: 10,
-            letterSpacing: 1.4,
-            textTransform: 'uppercase',
-            color: isNow ? '#fff' : 'rgba(255,255,255,0.7)',
-            padding: '4px 8px',
-            borderRadius: 4,
-            background: isNow ? `${accent}cc` : 'rgba(0,0,0,0.55)',
-            backdropFilter: 'blur(6px)',
-            WebkitBackdropFilter: 'blur(6px)',
-          }}
-        >
-          {isNow && (
-            <span
-              style={{
-                width: 6, height: 6, borderRadius: '50%', background: '#fff',
-                boxShadow: '0 0 6px #fff',
-                animation: 'cmp-pulse 1.4s ease-in-out infinite',
-              }}
-            />
-          )}
-          {isNow ? 'LIVE' : 'MANUAL'}
-          <style>{`@keyframes cmp-pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
-        </div>
       </div>
 
       {/* Row list */}
