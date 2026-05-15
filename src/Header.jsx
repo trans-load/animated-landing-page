@@ -85,11 +85,15 @@ function Header({ accent = '#f97315', scrolled = false }) {
           gap: 8,
           padding: '8px 8px 8px 20px',
           borderRadius: 999,
+          // Higher alpha + smaller blur. backdrop-filter forces the
+          // browser to re-blur the scrolling content behind the fixed
+          // header on every frame; large radii are a major scroll-jank
+          // cause. The denser background masks most of the contrast loss.
           background: scrolled
-            ? 'rgba(28, 28, 30, 0.55)'
-            : 'rgba(40, 40, 44, 0.42)',
-          backdropFilter: 'blur(22px) saturate(160%)',
-          WebkitBackdropFilter: 'blur(22px) saturate(160%)',
+            ? 'rgba(20, 20, 22, 0.86)'
+            : 'rgba(28, 28, 32, 0.74)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
           border: '1px solid rgba(255,255,255,0.10)',
           boxShadow:
             '0 1px 0 rgba(255,255,255,0.08) inset, 0 10px 40px rgba(0,0,0,0.25)',

@@ -46,12 +46,28 @@ function PointCloud({
   const sizeRef = useRefPc(pointSize);
   const accentRef = useRefPc(accent);
   const onAnchorProjectRef = useRefPc(onAnchorProject);
+  // Skip the per-frame Three.js render when the hero is scrolled out of
+  // view. Saves significant CPU + GPU once the user scrolls past it.
+  const visibleRef = useRefPc(true);
 
   useEffectPc(() => { progressRef.current = progress; }, [progress]);
   useEffectPc(() => { rotateRef.current = autoRotate; }, [autoRotate]);
   useEffectPc(() => { sizeRef.current = pointSize; }, [pointSize]);
   useEffectPc(() => { accentRef.current = accent; }, [accent]);
   useEffectPc(() => { onAnchorProjectRef.current = onAnchorProject; }, [onAnchorProject]);
+
+  useEffectPc(() => {
+    const el = containerRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) visibleRef.current = e.isIntersecting;
+      },
+      { threshold: 0 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   useEffectPc(() => {
     if (!window.__SCENE_B64 || !window.THREE) return;
@@ -343,6 +359,13 @@ function PointCloud({
     const tick = () => {
       const s = stateRef.current;
       if (!s) return;
+      // When the hero scrolls out of view, skip Three.js rendering + chip
+      // projection entirely. Keep rAF rolling so we resume cleanly on
+      // scroll-back; an empty rAF tick is essentially free.
+      if (!visibleRef.current) {
+        rafId = requestAnimationFrame(tick);
+        return;
+      }
       const p = progressRef.current;
       const auto = rotateRef.current;
 
