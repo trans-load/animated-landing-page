@@ -23,6 +23,9 @@ function TrackingLookup({ accent = '#f97315' }) {
   const [demoCursor, setDemoCursor] = useStateTL(null); // {ix, iy} in image coords
   const [demoStopped, setDemoStopped] = useStateTL(false);
   const [sectionSeen, setSectionSeen] = useStateTL(false);
+  // Tracks whether the section is currently in the viewport so we can pause
+  // the polygon breathing animations + auto-tour timers when off-screen.
+  const [sectionInView, setSectionInView] = useStateTL(false);
   const pickerWrapRef = useRefTL(null);
   const imgWrapRef = useRefTL(null);
   const demoTimersRef = useRefTL([]);
@@ -121,6 +124,24 @@ function TrackingLookup({ accent = '#f97315' }) {
     obs.observe(el);
     return () => obs.disconnect();
   }, [sectionSeen]);
+
+  // Track current viewport intersection so the polygon breathing animations
+  // can be paused via CSS when the section is scrolled out of view.
+  useEffectTL(() => {
+    const el = imgWrapRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setSectionInView(true);
+      return;
+    }
+    const obs = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) setSectionInView(e.isIntersecting);
+      },
+      { threshold: 0 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   // Auto-demo: once the section is visible, roam a simulated cursor between
   // a few handling units with a "Click here" badge attached. Loops until
@@ -599,6 +620,7 @@ function TrackingLookup({ accent = '#f97315' }) {
               <svg
                 viewBox={`0 0 ${imgW} ${imgH}`}
                 preserveAspectRatio="xMidYMid slice"
+                className={sectionInView ? undefined : 'tl-paused'}
                 style={{
                   position: 'absolute',
                   inset: 0,
@@ -895,6 +917,12 @@ function TrackingLookup({ accent = '#f97315' }) {
         .tl-poly-breathe {
           animation: tlBreathe 3.4s ease-in-out infinite;
           transform-origin: center;
+        }
+        /* Pause the per-polygon breathing animation when the section is
+           scrolled out of view — keeps 51 simultaneous animations from
+           burning paint cycles off-screen. */
+        .tl-paused .tl-poly-breathe {
+          animation-play-state: paused;
         }
         @media (max-width: 900px) {
           .tracking-section { padding: 64px 20px 80px !important; }

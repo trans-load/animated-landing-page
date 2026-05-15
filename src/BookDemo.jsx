@@ -1,12 +1,39 @@
 // Book-a-demo section with Cal.com embed (jago-wahl/meet)
-const { useEffect: useEffectBD, useRef: useRefBD } = React;
+const { useEffect: useEffectBD, useRef: useRefBD, useState: useStateBD } = React;
 
 function BookDemo() {
   const mounted = useRefBD(false);
+  const sectionRef = useRefBD(null);
+  const [shouldMount, setShouldMount] = useStateBD(false);
   const { t } = window.useT();
 
+  // Defer the Cal.com bundle + iframe until the section approaches the
+  // viewport. Saves a heavy network + JS cost on initial page load and
+  // keeps scrolling smooth above this section.
   useEffectBD(() => {
-    if (mounted.current) return;
+    const el = sectionRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setShouldMount(true);
+      return;
+    }
+    const obs = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            setShouldMount(true);
+            obs.disconnect();
+            break;
+          }
+        }
+      },
+      { rootMargin: '300px 0px' }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffectBD(() => {
+    if (!shouldMount || mounted.current) return;
     mounted.current = true;
 
     // Official Cal.com embed init — pasted verbatim from their docs, then customized
@@ -51,10 +78,11 @@ function BookDemo() {
       hideEventTypeDetails: false,
       layout: "month_view",
     });
-  }, []);
+  }, [shouldMount]);
 
   return (
     <section
+      ref={sectionRef}
       id="book-demo"
       className="bookdemo-section"
       style={{
