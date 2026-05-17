@@ -54,7 +54,19 @@
       'tracking.destination': 'Destination',
       'tracking.gate': 'Gate',
       'tracking.click_here': 'Click here',
+      'tracking.tip.status': 'Status',
+      'tracking.tip.dest': 'Dest',
+      'tracking.tip.detected_as': 'Detected as',
+      'tracking.tip.counter': '{n} handling units tracked',
+      // All status values currently emitted by assets/tracking-scene.json
+      // are "Inbound staged" — the single mapping below covers the
+      // entire dataset. Add more entries if new statuses appear.
       'tracking.status.inbound_staged': 'Inbound staged',
+      'tracking.cat.dock': 'Dock',
+      'tracking.cat.forklift': 'Forklift',
+      'tracking.cat.handling_unit': 'Handling unit',
+      'tracking.cat.operator': 'Operator',
+      'tracking.cat.pallet_jack': 'Pallet jack',
 
       'comparison.eyebrow': 'What changes with transload',
       'comparison.headline': 'From a sample to full coverage.',
@@ -133,7 +145,16 @@
       'tracking.destination': 'Ziel',
       'tracking.gate': 'Tor',
       'tracking.click_here': 'Hier klicken',
+      'tracking.tip.status': 'Status',
+      'tracking.tip.dest': 'Ziel',
+      'tracking.tip.detected_as': 'Erkannt als',
+      'tracking.tip.counter': '{n} Packstücke erkannt',
       'tracking.status.inbound_staged': 'Eingang',
+      'tracking.cat.dock': 'Tor',
+      'tracking.cat.forklift': 'Stapler',
+      'tracking.cat.handling_unit': 'Packstück',
+      'tracking.cat.operator': 'Mitarbeiter',
+      'tracking.cat.pallet_jack': 'Hubwagen',
 
       'comparison.eyebrow': 'Was sich mit transload \u00e4ndert',
       'comparison.headline': 'Vermessung im Hintergrund.',

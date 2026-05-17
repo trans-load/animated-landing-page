@@ -12,14 +12,18 @@ const GATE_COLORS = ['#38bdf8', '#34d399', '#facc15', '#f472b6', '#a78bfa'];
 
 function TrackingLookup({ accent = '#f97315' }) {
   const { t } = window.useT();
-  // Map raw status strings from tracking-scene.json to i18n keys so
-  // German users see "Eingang" instead of "Inbound staged" etc.
-  const statusLabel = (s) => {
-    if (!s) return s;
-    const key = 'tracking.status.' + s.toLowerCase().replace(/[^a-z0-9]+/g, '_');
-    const translated = t(key);
-    return translated && translated !== key ? translated : s;
+  // Translate a raw enum-like string (status or category) via i18n. If
+  // no translation key exists, fall back to the original raw value so
+  // un-mapped strings (e.g. future status values from the JSON data)
+  // still render readably.
+  const lookup = (prefix, raw) => {
+    if (!raw) return raw;
+    const key = prefix + raw.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+    const out = t(key);
+    return out && out !== key ? out : raw;
   };
+  const statusLabel = (s) => lookup('tracking.status.', s);
+  const categoryLabel = (c) => lookup('tracking.cat.', c);
   const [data, setData] = useStateTL(null);
   const [loadError, setLoadError] = useStateTL(null);
   const [selectedId, setSelectedId] = useStateTL(null);
@@ -856,8 +860,8 @@ function TrackingLookup({ accent = '#f97315' }) {
                     )}
                     <span>
                       {hovered.tracking && gateOf[hovered.id] != null
-                        ? `Gate ${gateOf[hovered.id] + 1} · ${hovered.category}`
-                        : hovered.category}
+                        ? `${t('tracking.gate')} ${gateOf[hovered.id] + 1} · ${categoryLabel(hovered.category)}`
+                        : categoryLabel(hovered.category)}
                     </span>
                   </div>
                   {hovered.tracking ? (
@@ -873,13 +877,13 @@ function TrackingLookup({ accent = '#f97315' }) {
                         {hovered.tracking}
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, fontSize: 11.5 }}>
-                        <TipLine label="Status" value={statusLabel(hovered.status)} color={hovered.statusColor} />
-                        <TipLine label="Dest" value={hovered.destination} />
+                        <TipLine label={t('tracking.tip.status')} value={statusLabel(hovered.status)} color={hovered.statusColor} />
+                        <TipLine label={t('tracking.tip.dest')} value={hovered.destination} />
                       </div>
                     </>
                   ) : (
                     <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)' }}>
-                      Detected as <strong style={{ color: '#fff' }}>{hovered.label}</strong>
+                      {t('tracking.tip.detected_as')} <strong style={{ color: '#fff' }}>{hovered.label}</strong>
                     </div>
                   )}
                 </div>
@@ -910,7 +914,7 @@ function TrackingLookup({ accent = '#f97315' }) {
                   width: 7, height: 7, borderRadius: '50%',
                   background: accent, boxShadow: `0 0 8px ${accent}`,
                 }} />
-                {trackedItems.length} handling units tracked
+                {t('tracking.tip.counter').replace('{n}', trackedItems.length)}
               </div>
             )}
 

@@ -1,6 +1,9 @@
 // Founder contact cards, adapted from transload's team section for the dark landing page.
 function FounderCards({ accent = '#f97315' }) {
   const { t } = window.useT();
+  // Roles are intentionally hardcoded English abbreviations — CEO / CTO
+  // are universal in tech and read the same in both EN and DE
+  // versions of the site.
   const founders = [
     {
       name: 'Julius Scheel',

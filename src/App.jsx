@@ -22,6 +22,15 @@ function App() {
     const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
   }, []);
+  // Pick the hero video source ONCE on mount. Tying the src to live
+  // window.innerWidth would cause React to swap the <video> src on
+  // every resize / device-rotation crossing the 720px breakpoint,
+  // forcing a full reload + losing the priming + scrub position.
+  const [heroVideoSrc] = useStateApp(() =>
+    (typeof window !== 'undefined' && window.innerWidth <= 720)
+      ? 'assets/hero-mobile.mp4'
+      : 'assets/hero.mp4'
+  );
   const heroRef = useRefApp(null);
   const videoRef = useRefApp(null);
   // Ref on the hero text container so the scroll rAF can mutate the
@@ -225,9 +234,7 @@ function App() {
               preload="auto"
               aria-hidden="true"
               poster="assets/warehouse.png?v=6"
-              src={typeof window !== 'undefined' && window.innerWidth <= 720
-                ? 'assets/hero-mobile.mp4'
-                : 'assets/hero.mp4'}
+              src={heroVideoSrc}
               style={{
                 position: 'absolute',
                 inset: 0,
@@ -1122,7 +1129,8 @@ function App() {
       })()}
 
       {/* Search & reveal — tracking number → segmentation highlight.
-          EN-only for now; the DE version of the page stays unchanged. */}
+          Bilingual: i18n keys cover the headline, picker, gate labels,
+          status badges, and the demo CTA. */}
       {window.TrackingLookup && <TrackingLookup accent={tweaks.accent} />}
 
       {/* Founder contact cards */}
