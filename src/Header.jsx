@@ -1,4 +1,6 @@
-// Glassy floating header for transload
+// Glassy floating header for transload — restored. Floating dark pill
+// with subtle blur. Reads as an accent strip against both the dark hero
+// video and the white content below.
 const { useState: useStateHd, useEffect: useEffectHd } = React;
 
 function Header({ accent = '#f97315', scrolled = false }) {
@@ -12,24 +14,14 @@ function Header({ accent = '#f97315', scrolled = false }) {
   }, []);
   const isCompact = vw < 1100;
   const isMobile = vw < 720;
-  // Use root-anchored hashes so the nav works from legal sub-pages too.
-  // EN re-labels the three main links to match the new section names;
-  // DE keeps its original Integration / Benefits / Demo nav.
-  const navItems = lang === 'en'
-    ? [
-        { key: 'dimensions',  label: 'Dimensions',     href: '/#comparison' },
-        { key: 'tracking',    label: 'Tracking',       href: '/#tracking-lookup' },
-        { key: 'demo',        label: t('nav.demo'),    href: '/#book-demo' },
-        { key: 'phone',       label: t('nav.phone'),   href: 'tel:+4916095343013', icon: 'phone' },
-        { key: 'contact',     label: t('nav.contact'), href: '/#book-demo' },
-      ]
-    : [
-        { key: 'installation', label: t('nav.installation'), href: '/#install' },
-        { key: 'comparison',   label: t('nav.comparison'),   href: '/#comparison' },
-        { key: 'demo',         label: t('nav.demo'),         href: '/#book-demo' },
-        { key: 'phone',        label: t('nav.phone'),        href: 'tel:+4916095343013', icon: 'phone' },
-        { key: 'contact',      label: t('nav.contact'),      href: '/#book-demo' },
-      ];
+  // Same nav structure for both languages — labels translate via i18n.
+  const navItems = [
+    { key: 'dimensions',  label: t('nav.dimensions'), href: '/#comparison' },
+    { key: 'tracking',    label: t('nav.tracking'),   href: '/#tracking-lookup' },
+    { key: 'demo',        label: t('nav.demo'),       href: '/#book-demo' },
+    { key: 'phone',       label: t('nav.phone'),      href: 'tel:+4916095343013', icon: 'phone' },
+    { key: 'contact',     label: t('nav.contact'),    href: '/#book-demo' },
+  ];
 
   return (
     <header
@@ -44,39 +36,11 @@ function Header({ accent = '#f97315', scrolled = false }) {
         pointerEvents: 'none',
       }}
     >
-      {/* Centered YC backing pill — stacked below the nav */}
-      {false && !isMobile && (
-        <div
-          style={{
-            position: 'absolute',
-            left: '50%',
-            top: 68,
-            transform: 'translateX(-50%)',
-            pointerEvents: 'auto',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 10,
-            padding: '5px 12px 5px 9px',
-            borderRadius: 999,
-            background: '#ffffff',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
-            border: '1px solid rgba(0,0,0,0.06)',
-            boxShadow: '0 4px 14px rgba(0,0,0,0.18)',
-            fontFamily: '"Inter", system-ui, sans-serif',
-            fontSize: 12.5,
-            letterSpacing: -0.1,
-            zIndex: 1,
-          }}
-        >
-          <span style={{ color: '#6b6b6b', fontWeight: 400 }}>Backed by</span>
-          <img
-            src="assets/yc-logo-expanded-orange.png"
-            alt="Y Combinator"
-            style={{ height: 14, width: 'auto', display: 'block', borderRadius: 0 }}
-          />
-        </div>
-      )}
+      {/* Liquid-glass pill: heavy blur + saturation boost so the bar
+          actually frosts the content behind it instead of just sitting
+          on top with a flat tint. Multi-layer shadow: a tight specular
+          highlight at the top edge, a soft dark drop below, and a thin
+          inner ring for depth — that's what reads as "liquid glass". */}
       <div
         style={{
           pointerEvents: 'auto',
@@ -85,18 +49,18 @@ function Header({ accent = '#f97315', scrolled = false }) {
           gap: 8,
           padding: '8px 8px 8px 20px',
           borderRadius: 999,
-          // Higher alpha + smaller blur. backdrop-filter forces the
-          // browser to re-blur the scrolling content behind the fixed
-          // header on every frame; large radii are a major scroll-jank
-          // cause. The denser background masks most of the contrast loss.
           background: scrolled
-            ? 'rgba(20, 20, 22, 0.86)'
-            : 'rgba(28, 28, 32, 0.74)',
-          backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255,255,255,0.10)',
+            ? 'rgba(20, 20, 22, 0.22)'
+            : 'rgba(20, 20, 22, 0.12)',
+          backdropFilter: 'blur(32px) saturate(180%) brightness(110%)',
+          WebkitBackdropFilter: 'blur(32px) saturate(180%) brightness(110%)',
+          border: '1px solid rgba(255,255,255,0.14)',
           boxShadow:
-            '0 1px 0 rgba(255,255,255,0.08) inset, 0 10px 40px rgba(0,0,0,0.25)',
+            '0 1px 0 rgba(255,255,255,0.22) inset,' +
+            '0 -1px 0 rgba(255,255,255,0.04) inset,' +
+            '0 0 0 0.5px rgba(255,255,255,0.06),' +
+            '0 10px 28px rgba(0,0,0,0.22),' +
+            '0 4px 12px rgba(0,0,0,0.14)',
           transition: 'background 200ms ease',
         }}
       >
@@ -200,7 +164,7 @@ function Header({ accent = '#f97315', scrolled = false }) {
         </nav>
         )}
 
-        {/* Language toggle — far right, always visible incl. mobile */}
+        {/* Language toggle */}
         <div
           style={{
             display: 'inline-flex',

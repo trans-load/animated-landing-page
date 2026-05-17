@@ -140,49 +140,135 @@
   /* Account for the fixed header when jumping to an anchor so section
      eyebrows don't disappear under the pill. */
   #install, #comparison, #tracking-lookup, #founders, #faq, #book-demo { scroll-margin-top: 88px; }
-  html, body { margin: 0; padding: 0; background: #0a0a0a; }
+  html, body { margin: 0; padding: 0; background: #ffffff; }
   body {
     font-family: "Inter", system-ui, -apple-system, sans-serif;
-    color: #fff;
+    color: #0a0a0a;
     overflow-x: hidden;
   }
   #root { min-height: 100vh; }
-  ::selection { background: #f97315; color: #0a0a0a; }
-  /* Scrollbar */
+  ::selection { background: #f97315; color: #ffffff; }
+  /* Light-theme scrollbar */
   ::-webkit-scrollbar { width: 10px; }
-  ::-webkit-scrollbar-track { background: #0a0a0a; }
-  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 5px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+  ::-webkit-scrollbar-track { background: #ffffff; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.18); border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.32); }
+  /* Hero text reveal — scroll-tied via CSS variables. The rAF in App.jsx
+     mutates `--p` on the .hero-text container only; every per-char value
+     is computed by CSS clamp() + smoothstep from `--p`, the char's
+     trigger `--t`, and the reveal window `--w`. Smoothstep
+     (x² · (3 − 2x)) softens the linear ramp at both ends so chars
+     ease into place instead of snapping.
+
+     Per-char effects layered into the entrance:
+       • opacity 0 → 1
+       • translateY 0.5em → 0  (drop in from below)
+       • scale 1.25 → 1        (settle to size)
+       • text-shadow flare     (orange glow that fades as the char lands)
+     Everything composes onto the GPU; no JS per frame. */
+  .hero-text { --p: 0; }
+  /* CCTV REC indicator pulse — used during the intro phase when the
+     hero video sits as a small monitor in the center of the stage. */
+  @keyframes cctvPulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.35; }
+  }
+
+  /* Hover affordance on the YC backing badge — multiple cues so it's
+     visibly interactive: "Combinator" turns orange + gets an underline,
+     the Y mark scales up and gets a stronger glow, all spans nudge up
+     by 1px. */
+  .yc-badge span,
+  .yc-badge img { transition: color 220ms ease, transform 220ms ease, filter 220ms ease, text-decoration-color 220ms ease; }
+  .yc-badge:hover span:last-child {
+    color: #f97315;
+    text-decoration: underline;
+    text-decoration-color: #f97315;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 2px;
+  }
+  .yc-badge:hover img {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 10px rgba(249,115,21,0.8));
+  }
+  .yc-badge:hover span:first-child { color: #0a0a0a; }
+
+  /* Show only the desktop register-tab by default; swap to the
+     mobile-tuned wider variant under 720px. */
+  .register-tab--mobile { display: none !important; }
+  .hero-char {
+    display: inline-block;
+    --raw: clamp(0, calc((var(--p, 0) - var(--t, 0)) / var(--w, 0.05)), 1);
+    --local: calc(var(--raw) * var(--raw) * (3 - 2 * var(--raw)));
+    --rev: calc(1 - var(--local));
+    opacity: var(--local);
+    transform: translateY(calc(var(--rev) * 0.5em)) scale(calc(1 + var(--rev) * 0.25));
+    text-shadow:
+      0 0 calc(var(--rev) * 22px) rgba(249, 115, 21, calc(var(--rev) * 0.85)),
+      0 1px 2px rgba(0,0,0,0.85),
+      0 2px 14px rgba(0,0,0,0.75),
+      0 0 38px rgba(0,0,0,0.55);
+    will-change: opacity, transform;
+  }
+  .hero-yc-pill {
+    --raw: clamp(0, calc(var(--p, 0) / 0.04), 1);
+    --local: calc(var(--raw) * var(--raw) * (3 - 2 * var(--raw)));
+    opacity: var(--local);
+    transform: translateY(calc((1 - var(--local)) * 8px));
+    will-change: opacity, transform;
+  }
+  /* Scrollbar */
+  /* (duplicate scrollbar rules removed — light-theme version is above) */
 
   /* Mobile responsive tweaks. Desktop keeps its inline styles untouched. */
   @media (max-width: 720px) {
-    /* Match the hero scene to the warehouse photo's native aspect (756:420)
-       and center it vertically in the sticky 100vh container so the full
-       image is visible with no cropping. Cloud + photo both fit this box. */
-    .hero-scene {
-      inset: 50% 0 auto 0 !important;  /* top 50%, right 0, bottom auto, left 0 */
-      width: 100% !important;
-      aspect-ratio: 756 / 420 !important;
-      transform: translateY(-50%) scale(2) !important;
-      transform-origin: center center !important;
+    /* Hero scene fills the sticky 100vh container; the video underneath
+       uses object-fit: cover so it crops cleanly to portrait viewports. */
+    /* The CAMERA FEED / 3D RECONSTRUCTION indicator clutters the
+       small mobile viewport; hide it on phones — the scroll-bound
+       headline reveal already communicates the interactive nature. */
+    .hero-bottombar { display: none !important; }
+    /* Swap to the wider mobile register-tab variant. */
+    .register-tab--desktop { display: none !important; }
+    .register-tab--mobile  { display: block !important; }
+
+    /* Tighten the YC badge on narrow viewports so it fits inside the
+       register-tab notch (which scales with the viewport via
+       preserveAspectRatio=none). */
+    .yc-badge { gap: 5px !important; }
+    .yc-badge span:first-child { font-size: 10px !important; }
+    .yc-badge img { height: 13px !important; width: 13px !important; }
+    .yc-badge span:last-child { font-size: 11px !important; }
+
+    /* CCTV chrome on mobile — all three labels at the same size as
+       REC (font-size 22). The timestamp wraps to two lines (date /
+       time) so it fits next to REC without horizontal overlap. */
+    .cctv-rec {
+      top: 16px !important;
+      left: 16px !important;
+      gap: 10px !important;
+      padding: 10px 18px 10px 14px !important;
+      font-size: 22px !important;
+      letter-spacing: 2px !important;
+      border-radius: 6px !important;
     }
-    /* Move the CAMERA FEED / 3D RECONSTRUCTION indicator to the top-right
-       of the hero on mobile so it sits above the YC "Unterstützt von"
-       pill that surfaces during the scroll reveal. */
-    .hero-bottombar {
-      position: fixed !important;  /* pin to viewport so it stays visible through the hero scroll */
-      left: auto !important;
+    .cctv-rec > span { width: 14px !important; height: 14px !important; }
+    .cctv-timestamp {
+      top: 16px !important;
       right: 16px !important;
-      top: 76px !important;        /* just below the fixed header pill */
-      bottom: auto !important;
-      width: auto !important;
-      gap: 8px !important;
-      justify-content: flex-end !important;
-      z-index: 45 !important;      /* above the hero, below the header pill (z:50) */
+      padding: 10px 14px !important;
+      font-size: 22px !important;
+      letter-spacing: 1.6px !important;
+      border-radius: 6px !important;
     }
-    .hero-bottombar > div:first-child { display: none !important; }  /* hide the empty spacer div */
-    .hero-progress  { min-width: 0 !important; font-size: 9px !important; letter-spacing: 1.4px !important; gap: 8px !important; }
-    .hero-progress > div { width: 56px !important; }
+    .cctv-cam {
+      bottom: 16px !important;
+      left: 16px !important;
+      padding: 10px 16px !important;
+      font-size: 22px !important;
+      letter-spacing: 2px !important;
+      border-radius: 6px !important;
+    }
   }
 </style>
 </head>
@@ -241,18 +327,11 @@
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 
-<!-- Three.js -->
-<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-
-<!-- Scene point cloud data (sets window.__SCENE_B64) -->
-<script src="assets/scene.js"></script>
-
 <!-- i18n (must load before Babel-transpiled components) -->
-<script src="src/i18n.js"></script>
+<script src="src/i18n.js?v=6"></script>
 
 <!-- App scripts -->
 <script type="text/babel" data-presets="react" src="src/Header.jsx"></script>
-<script type="text/babel" data-presets="react" src="src/PointCloud.jsx"></script>
 <script type="text/babel" data-presets="react" src="src/Tweaks.jsx"></script>
 <script type="text/babel" data-presets="react" src="src/Comparison.jsx"></script>
 <script type="text/babel" data-presets="react" src="src/ComparisonV3.jsx"></script>

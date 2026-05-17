@@ -1,27 +1,30 @@
 // Founder contact cards, adapted from transload's team section for the dark landing page.
 function FounderCards({ accent = '#f97315' }) {
   const { t } = window.useT();
+  // Roles are intentionally hardcoded English abbreviations — CEO / CTO
+  // are universal in tech and read the same in both EN and DE
+  // versions of the site.
   const founders = [
     {
-      name: 'Nils Börner',
-      role: t('founders.role'),
-      image: 'assets/founders/nils.jpeg',
-      linkedin: 'https://www.linkedin.com/in/boenils/',
-      email: 'mailto:nils@transload.io',
+      name: 'Julius Scheel',
+      role: 'CEO',
+      image: 'assets/founders/julius.png',
+      linkedin: 'https://www.linkedin.com/in/juliusscheel/',
+      email: 'mailto:julius@transload.io',
     },
     {
       name: 'Jago Wahl-Schwentker',
-      role: t('founders.role'),
+      role: 'CTO / Software',
       image: 'assets/founders/jago.jpeg',
       linkedin: 'https://www.linkedin.com/in/jagowahl/',
       email: 'mailto:jago@transload.io',
     },
     {
-      name: 'Julius Scheel',
-      role: t('founders.role'),
-      image: 'assets/founders/julius.png',
-      linkedin: 'https://www.linkedin.com/in/juliusscheel/',
-      email: 'mailto:julius@transload.io',
+      name: 'Nils Börner',
+      role: 'CTO / AI',
+      image: 'assets/founders/nils.webp',
+      linkedin: 'https://www.linkedin.com/in/boenils/',
+      email: 'mailto:nils@transload.io',
     },
   ];
 
@@ -34,8 +37,8 @@ function FounderCards({ accent = '#f97315' }) {
         overflow: 'hidden',
         padding: '112px 40px 96px',
         background:
-          'radial-gradient(circle at 50% 0%, rgba(249,115,21,0.12), rgba(10,10,10,0) 34%), #0a0a0a',
-        borderTop: '1px solid rgba(255,255,255,0.06)',
+          'radial-gradient(circle at 50% 0%, rgba(249,115,21,0.08), rgba(255,255,255,0) 34%), #ffffff',
+        borderTop: '1px solid rgba(0,0,0,0.06)',
       }}
     >
       <div
@@ -47,7 +50,7 @@ function FounderCards({ accent = '#f97315' }) {
           transform: 'translateX(-50%)',
           width: 'min(640px, 58vw)',
           height: 1,
-          background: 'linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.18), rgba(255,255,255,0))',
+          background: 'linear-gradient(90deg, rgba(0,0,0,0), rgba(0,0,0,0.10), rgba(0,0,0,0))',
         }}
       />
 
@@ -82,7 +85,7 @@ function FounderCards({ accent = '#f97315' }) {
               lineHeight: 1.08,
               letterSpacing: -1.2,
               margin: 0,
-              color: '#fff',
+              color: '#0a0a0a',
             }}
           >
             {t('founders.title')}
@@ -107,9 +110,9 @@ function FounderCards({ accent = '#f97315' }) {
                 textAlign: 'center',
                 borderRadius: 24,
                 padding: '30px 24px 24px',
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.035))',
-                border: '1px solid rgba(255,255,255,0.11)',
-                boxShadow: '0 20px 60px rgba(0,0,0,0.35)',
+                background: 'linear-gradient(180deg, #ffffff, #fafafa)',
+                border: '1px solid rgba(0,0,0,0.08)',
+                boxShadow: '0 16px 40px rgba(0,0,0,0.06), 0 4px 10px rgba(0,0,0,0.04)',
                 transition: 'transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease',
               }}
             >
@@ -134,8 +137,8 @@ function FounderCards({ accent = '#f97315' }) {
                   objectFit: 'cover',
                   borderRadius: '50%',
                   margin: '0 auto 22px',
-                  border: '4px solid rgba(255,255,255,0.08)',
-                  boxShadow: `0 0 0 1px rgba(255,255,255,0.08), 0 18px 50px rgba(0,0,0,0.45), 0 0 42px ${accent}20`,
+                  border: '4px solid rgba(0,0,0,0.05)',
+                  boxShadow: `0 0 0 1px rgba(0,0,0,0.05), 0 14px 36px rgba(0,0,0,0.08), 0 0 42px ${accent}1f`,
                 }}
               />
               <h3
@@ -146,7 +149,7 @@ function FounderCards({ accent = '#f97315' }) {
                   fontSize: 22,
                   lineHeight: 1.15,
                   letterSpacing: -0.25,
-                  color: '#fff',
+                  color: '#0a0a0a',
                 }}
               >
                 {founder.name}
@@ -204,7 +207,7 @@ function FounderCards({ accent = '#f97315' }) {
         .founder-card:hover {
           transform: translateY(-5px);
           border-color: rgba(249,115,21,0.30) !important;
-          box-shadow: 0 26px 78px rgba(0,0,0,0.46) !important;
+          box-shadow: 0 24px 56px rgba(0,0,0,0.10), 0 6px 14px rgba(0,0,0,0.05) !important;
         }
         .founder-link {
           display: inline-flex;
@@ -212,9 +215,9 @@ function FounderCards({ accent = '#f97315' }) {
           gap: 7px;
           padding: 9px 12px;
           border-radius: 11px;
-          background: rgba(255,255,255,0.055);
-          border: 1px solid rgba(255,255,255,0.10);
-          color: rgba(255,255,255,0.82);
+          background: rgba(0,0,0,0.04);
+          border: 1px solid rgba(0,0,0,0.10);
+          color: rgba(10,10,10,0.78);
           text-decoration: none;
           font-family: "Inter", system-ui, sans-serif;
           font-size: 14px;
@@ -227,9 +230,9 @@ function FounderCards({ accent = '#f97315' }) {
           transition: opacity 160ms ease, transform 160ms ease;
         }
         .founder-link:hover {
-          background: rgba(255,255,255,0.09);
+          background: rgba(249,115,21,0.08);
           border-color: rgba(249,115,21,0.35);
-          color: #fff;
+          color: #0a0a0a;
           transform: translateY(-1px);
         }
         .founder-link:hover span {

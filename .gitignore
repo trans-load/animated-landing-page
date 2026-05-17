@@ -1,2 +1,8 @@
 .gstack/
 .DS_Store
+.claude/
+# Raw render sources — only the transcoded MP4s in assets/ are shipped.
+*.mov
+# Stray uploads / source PNGs that have been re-encoded to WebP.
+IMG_*.PNG
+assets/founders/nils.png

@@ -45,7 +45,8 @@ function Comparison({ accent = '#f97315' }) {
       ref={sectionRef}
       style={{
         padding: '112px 40px 96px',
-        borderTop: '1px solid rgba(255,255,255,0.06)',
+        borderTop: '1px solid rgba(0,0,0,0.06)',
+        background: '#ffffff',
         position: 'relative',
         overflow: 'hidden',
       }}
@@ -96,7 +97,7 @@ function Comparison({ accent = '#f97315' }) {
               lineHeight: 1.08,
               letterSpacing: -1.2,
               margin: 0,
-              color: '#fff',
+              color: '#0a0a0a',
             }}
           >
             {lang === 'en' ? (
@@ -146,7 +147,7 @@ function Comparison({ accent = '#f97315' }) {
           <Card
             side="now"
             label={t('comparison.now.label')}
-            img="assets/now-highlighted.png"
+            img="assets/now-highlighted.webp"
             rows={nowRows}
             accent={accent}
             inView={inView}
@@ -191,7 +192,7 @@ function Card({ side, label, img, rows, accent, inView, delay }) {
           fontFamily: sans,
           fontSize: 28,
           fontWeight: 600,
-          color: isNow ? '#fff' : 'rgba(255,255,255,0.92)',
+          color: isNow ? '#0a0a0a' : 'rgba(10,10,10,0.7)',
           letterSpacing: -0.6,
           marginBottom: 22,
         }}
@@ -205,12 +206,12 @@ function Card({ side, label, img, rows, accent, inView, delay }) {
           position: 'relative',
           borderRadius: 20,
           overflow: 'hidden',
-          border: isNow ? `1.5px solid ${accent}` : '1px solid rgba(255,255,255,0.08)',
+          border: isNow ? `1.5px solid ${accent}` : '1px solid rgba(0,0,0,0.08)',
           boxShadow: isNow
-            ? `0 0 0 1px ${accent}18, 0 30px 80px rgba(249, 115, 21, 0.22), 0 0 60px rgba(249, 115, 21, 0.10)`
-            : '0 20px 60px rgba(0,0,0,0.5)',
+            ? `0 0 0 1px ${accent}18, 0 24px 60px rgba(249, 115, 21, 0.20), 0 0 50px rgba(249, 115, 21, 0.08)`
+            : '0 16px 40px rgba(0,0,0,0.08)',
           aspectRatio: '4 / 3',
-          background: '#0a0a0a',
+          background: '#f4f4f4',
         }}
       >
         <img
@@ -252,10 +253,10 @@ function Card({ side, label, img, rows, accent, inView, delay }) {
               gap: 14,
               padding: '14px 18px',
               borderRadius: 14,
-              background: isNow ? `${accent}0A` : 'rgba(255,255,255,0.025)',
+              background: isNow ? `${accent}10` : 'rgba(0,0,0,0.025)',
               border: isNow
                 ? `1px solid ${accent}33`
-                : '1px solid rgba(255,255,255,0.06)',
+                : '1px solid rgba(0,0,0,0.08)',
               opacity: inView ? 1 : 0,
               transform: inView ? 'translateY(0)' : 'translateY(8px)',
               transition: `opacity 500ms ease ${delay + 200 + i * 80}ms, transform 500ms cubic-bezier(0.2, 0.7, 0.2, 1) ${delay + 200 + i * 80}ms`,
@@ -266,12 +267,12 @@ function Card({ side, label, img, rows, accent, inView, delay }) {
                 width: 26,
                 height: 26,
                 borderRadius: '50%',
-                background: isNow ? `${accent}22` : 'rgba(255,255,255,0.06)',
+                background: isNow ? `${accent}22` : 'rgba(0,0,0,0.06)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0,
-                color: isNow ? accent : 'rgba(255,255,255,0.4)',
+                color: isNow ? accent : 'rgba(10,10,10,0.4)',
                 boxShadow: isNow ? `0 0 12px ${accent}33` : 'none',
               }}
             >
@@ -282,7 +283,7 @@ function Card({ side, label, img, rows, accent, inView, delay }) {
                 fontFamily: sans,
                 fontSize: 15.5,
                 fontWeight: 450,
-                color: isNow ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.72)',
+                color: isNow ? '#0a0a0a' : 'rgba(10,10,10,0.7)',
                 letterSpacing: -0.1,
                 lineHeight: 1.4,
               }}
@@ -318,7 +319,7 @@ function Bridge({ accent, inView }) {
           width: '100%',
           height: 1,
           transform: 'translateY(-50%)',
-          background: `linear-gradient(90deg, rgba(255,255,255,0.15) 0%, ${accent}55 50%, ${accent} 100%)`,
+          background: `linear-gradient(90deg, rgba(0,0,0,0.15) 0%, ${accent}55 50%, ${accent} 100%)`,
           opacity: inView ? 1 : 0,
           transition: 'opacity 800ms ease 200ms',
         }}
