@@ -1,0 +1,19 @@
+src/App.jsx
+  s_a8fd6b03953646::t_ecfc75c4e8b589 63-71,74-80,86,89-111,115,121-123,125-127,129-135,137-139
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "ab81e5a9eb1ee8cdd6ef2493e61b9d6cc924271b",
+  "prompts": {},
+  "sessions": {
+    "s_a8fd6b03953646": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2b3cde69-6693-4cdc-b0da-5e6aae34e9a1",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Nils Boerner <boerner_nils@gmx.de>"
+    }
+  }
+}
