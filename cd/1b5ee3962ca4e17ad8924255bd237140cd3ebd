@@ -1,0 +1,34 @@
+src/App.jsx
+  s_a8fd6b03953646::t_063f9891e8c1b9 237
+  s_a8fd6b03953646::t_c356842cf4ccf8 25-33
+  s_a8fd6b03953646::t_4065e5a7983dc7 1132-1133
+src/i18n.js
+  s_a8fd6b03953646::t_56b4759158a00b 148-151,153-157
+  s_a8fd6b03953646::t_d24ec9f015838c 57-63,65-69
+index.html
+  s_a8fd6b03953646::t_bed6342106ad51 331
+src/TrackingLookup.jsx
+  s_a8fd6b03953646::t_3713e6a4114951 880-881
+  s_a8fd6b03953646::t_4990d062bc4945 917
+  s_a8fd6b03953646::t_7216e9c6a8ba53 886
+  s_a8fd6b03953646::t_d2328ef502587e 863-864
+  s_a8fd6b03953646::t_ca9b490012fbd8 15-23,25-26
+src/FounderCards.jsx
+  s_a8fd6b03953646::t_7c4185af1f49c3 4-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "cd1b5ee3962ca4e17ad8924255bd237140cd3ebd",
+  "prompts": {},
+  "sessions": {
+    "s_a8fd6b03953646": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2b3cde69-6693-4cdc-b0da-5e6aae34e9a1",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Nils Boerner <boerner_nils@gmx.de>"
+    }
+  }
+}
