@@ -60,54 +60,83 @@ function App() {
     });
   };
 
-  // Scroll progress: hero is sticky, drives 0..1 over its scroll range
+  // Scroll progress: hero is sticky, drives 0..1 over its scroll range.
+  //
+  // Mouse wheels emit large chunky deltas (typically 100px/tick) while
+  // trackpads emit small smooth deltas (~5-20px). If we read the raw
+  // scroll position every wheel event, the video scrubs in jerky
+  // multi-frame jumps on a mouse. Fix: maintain a smoothed
+  // `currentP` that lerps toward the raw `targetP` on every rAF tick.
+  // Mouse wheels still snap the scrollbar to the new position, but
+  // the rendered video + CSS var catch up smoothly over ~150ms.
   useEffectApp(() => {
     let rafId = 0;
-    let scheduled = false;
-    const compute = () => {
-      scheduled = false;
-      rafId = 0;
+    let running = true;
+    let targetP = 0;
+    let currentP = 0;
+    let lastSetP = -1;
+    const LERP = 0.18; // ~0.85 catch-up in 150ms at 60fps
+
+    const computeTarget = () => {
       const el = heroRef.current;
       if (!el) return;
       const rect = el.getBoundingClientRect();
       const total = el.offsetHeight - window.innerHeight;
       const scrolledPx = Math.min(Math.max(-rect.top, 0), total);
-      const p = total > 0 ? scrolledPx / total : 0;
-      setProgress(p);
+      targetP = total > 0 ? scrolledPx / total : 0;
       setScrolled(window.scrollY > 20);
-      // Hero is "in view" until its bottom edge scrolls past the top of
-      // the viewport. Used to fade the mobile position:fixed indicator
-      // once the user has scrolled past the hero section entirely.
       setHeroInView(rect.bottom > 80);
-      // Drive the hero video frame from scroll. The first 15% of the
-      // scroll is the intro (monitor scaling up) — during that, the
-      // video stays paused at frame 0. After progress 0.15, the
-      // remaining 85% maps to the full video duration.
+    };
+
+    const tick = () => {
+      if (!running) return;
+      const delta = targetP - currentP;
+      if (Math.abs(delta) < 0.0003) {
+        currentP = targetP; // snap when essentially there
+      } else {
+        currentP += delta * LERP;
+      }
+
+      // Only push to React state when the smoothed value has moved
+      // meaningfully — avoids re-rendering the whole tree at 60fps
+      // for sub-pixel changes.
+      if (Math.abs(currentP - lastSetP) > 0.002 || currentP === targetP) {
+        setProgress(currentP);
+        lastSetP = currentP;
+      }
+
+      // Drive the hero video frame from the SMOOTHED progress. The
+      // first 15% of the scroll is the intro (monitor scaling up) —
+      // during that, the video stays paused at frame 0. After
+      // progress 0.15, the remaining 85% maps to the full duration.
       const v = videoRef.current;
       if (v && v.duration && isFinite(v.duration)) {
         const INTRO_END = 0.15;
-        const videoP = p < INTRO_END ? 0 : (p - INTRO_END) / (1 - INTRO_END);
+        const videoP = currentP < INTRO_END ? 0 : (currentP - INTRO_END) / (1 - INTRO_END);
         const target = videoP * v.duration;
         if (Math.abs(v.currentTime - target) > 1 / 48) {
           v.currentTime = target;
         }
       }
-      // Mutate the CSS `--p` on the hero text container directly. The
-      // per-char opacity/translate calc lives in CSS (clamp/calc on
-      // --p, --t, --w) so we avoid React reconciling 30+ char spans
-      // on every scroll event.
+
+      // CSS variable for per-char headline reveal (clamp/calc on --p
+      // computes opacity/translate without React reconciling chars).
       const tx = heroTextRef.current;
-      if (tx) tx.style.setProperty('--p', String(p));
+      if (tx) tx.style.setProperty('--p', String(currentP));
+
+      rafId = requestAnimationFrame(tick);
     };
-    const onScroll = () => {
-      if (scheduled) return;
-      scheduled = true;
-      rafId = requestAnimationFrame(compute);
-    };
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
+
+    computeTarget();
+    currentP = targetP; // start without an initial catch-up animation
+    window.addEventListener('scroll', computeTarget, { passive: true });
+    window.addEventListener('resize', computeTarget, { passive: true });
+    rafId = requestAnimationFrame(tick);
+
     return () => {
-      window.removeEventListener('scroll', onScroll);
+      running = false;
+      window.removeEventListener('scroll', computeTarget);
+      window.removeEventListener('resize', computeTarget);
       if (rafId) cancelAnimationFrame(rafId);
     };
   }, []);
