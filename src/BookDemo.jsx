@@ -66,7 +66,7 @@ function BookDemo() {
 
     Cal.ns.meet("inline", {
       elementOrSelector: "#cal-inline-meet",
-      config: { layout: "month_view", theme: "dark" },
+      config: { layout: "month_view", theme: "light" },
       calLink: "julius.scheel/20-min-intro",
     });
 
@@ -87,8 +87,8 @@ function BookDemo() {
       className="bookdemo-section"
       style={{
         padding: '112px 40px 96px',
-        background: '#0a0a0a',
-        borderTop: '1px solid rgba(255,255,255,0.06)',
+        background: '#ffffff',
+        borderTop: '1px solid rgba(0,0,0,0.06)',
       }}
     >
       <div style={{ maxWidth: 1240, margin: '0 auto' }}>
@@ -100,7 +100,7 @@ function BookDemo() {
             lineHeight: 1.08,
             letterSpacing: -1.2,
             margin: '0 0 64px',
-            color: '#ffffff',
+            color: '#0a0a0a',
           }}
         >
           {t('book.headline')}
@@ -110,9 +110,9 @@ function BookDemo() {
           style={{
             borderRadius: 18,
             overflow: 'hidden',
-            background: '#111',
-            border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.45)',
+            background: '#ffffff',
+            border: '1px solid rgba(0,0,0,0.08)',
+            boxShadow: '0 16px 40px rgba(0,0,0,0.06)',
           }}
         >
           <div

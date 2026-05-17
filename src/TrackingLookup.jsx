@@ -11,6 +11,15 @@ const { useState: useStateTL, useEffect: useEffectTL, useMemo: useMemoTL, useRef
 const GATE_COLORS = ['#38bdf8', '#34d399', '#facc15', '#f472b6', '#a78bfa'];
 
 function TrackingLookup({ accent = '#f97315' }) {
+  const { t } = window.useT();
+  // Map raw status strings from tracking-scene.json to i18n keys so
+  // German users see "Eingang" instead of "Inbound staged" etc.
+  const statusLabel = (s) => {
+    if (!s) return s;
+    const key = 'tracking.status.' + s.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+    const translated = t(key);
+    return translated && translated !== key ? translated : s;
+  };
   const [data, setData] = useStateTL(null);
   const [loadError, setLoadError] = useStateTL(null);
   const [selectedId, setSelectedId] = useStateTL(null);
@@ -246,8 +255,8 @@ function TrackingLookup({ accent = '#f97315' }) {
       className="tracking-section"
       style={{
         padding: '112px 40px 96px',
-        background: '#0a0a0a',
-        borderTop: '1px solid rgba(255,255,255,0.06)',
+        background: '#ffffff',
+        borderTop: '1px solid rgba(0,0,0,0.06)',
       }}
     >
       <div style={{ maxWidth: 1240, margin: '0 auto' }}>
@@ -259,10 +268,10 @@ function TrackingLookup({ accent = '#f97315' }) {
             lineHeight: 1.08,
             letterSpacing: -1.2,
             margin: '0 0 64px',
-            color: '#ffffff',
+            color: '#0a0a0a',
           }}
         >
-          Find and track any shipment{' '}
+          {t('tracking.headline.prefix')}{' '}
           <span
             style={{
               background: 'linear-gradient(90deg, #ffb070 0%, #f97315 55%, #c95808 100%)',
@@ -272,7 +281,7 @@ function TrackingLookup({ accent = '#f97315' }) {
               color: 'transparent',
             }}
           >
-            on the dock.
+            {t('tracking.headline.accent')}
           </span>
         </h2>
 
@@ -300,11 +309,11 @@ function TrackingLookup({ accent = '#f97315' }) {
                 fontSize: 11,
                 letterSpacing: 1.5,
                 textTransform: 'uppercase',
-                color: 'rgba(255,255,255,0.55)',
+                color: 'rgba(10,10,10,0.55)',
                 marginBottom: 10,
               }}
             >
-              Handling unit ({trackedItems.length} on floor)
+              {t('tracking.count_template').replace('{n}', trackedItems.length)}
             </label>
             <button
               type="button"
@@ -314,11 +323,11 @@ function TrackingLookup({ accent = '#f97315' }) {
               style={{
                 width: '100%',
                 appearance: 'none',
-                background: 'rgba(255,255,255,0.04)',
-                border: `1px solid ${pickerOpen ? accent : 'rgba(255,255,255,0.14)'}`,
+                background: '#ffffff',
+                border: `1px solid ${pickerOpen ? accent : 'rgba(0,0,0,0.14)'}`,
                 borderRadius: 12,
                 padding: '14px 16px',
-                color: '#fff',
+                color: '#0a0a0a',
                 cursor: 'pointer',
                 textAlign: 'left',
                 fontFamily: '"JetBrains Mono", monospace',
@@ -343,10 +352,10 @@ function TrackingLookup({ accent = '#f97315' }) {
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                color: selected ? '#fff' : 'rgba(255,255,255,0.55)',
+                color: selected ? '#0a0a0a' : 'rgba(10,10,10,0.55)',
                 minWidth: 0,
               }}>
-                {selected ? selected.tracking : 'Select a handling unit'}
+                {selected ? selected.tracking : t('tracking.select')}
               </span>
               {selected && (
                 <span
@@ -356,7 +365,7 @@ function TrackingLookup({ accent = '#f97315' }) {
                   onClick={(e) => { e.stopPropagation(); setSelectedId(null); }}
                   onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); setSelectedId(null); } }}
                   style={{
-                    color: 'rgba(255,255,255,0.55)',
+                    color: 'rgba(10,10,10,0.55)',
                     fontSize: 18,
                     lineHeight: 1,
                     padding: '0 4px',
@@ -367,7 +376,7 @@ function TrackingLookup({ accent = '#f97315' }) {
               <svg width="12" height="8" viewBox="0 0 12 8" aria-hidden="true"
                 style={{
                   flexShrink: 0,
-                  color: 'rgba(255,255,255,0.55)',
+                  color: 'rgba(10,10,10,0.55)',
                   transform: pickerOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                   transition: 'transform 180ms ease',
                 }}
@@ -387,10 +396,10 @@ function TrackingLookup({ accent = '#f97315' }) {
                   left: 0,
                   zIndex: 30,
                   width: `min(${Math.max(420, itemsByGate.length * 190)}px, calc(100vw - 80px))`,
-                  background: '#0e0e10',
-                  border: '1px solid rgba(255,255,255,0.14)',
+                  background: '#ffffff',
+                  border: '1px solid rgba(0,0,0,0.10)',
                   borderRadius: 14,
-                  boxShadow: '0 18px 48px rgba(0,0,0,0.6)',
+                  boxShadow: '0 16px 40px rgba(0,0,0,0.10), 0 4px 10px rgba(0,0,0,0.05)',
                   padding: 14,
                   display: 'grid',
                   gridTemplateColumns: `repeat(${itemsByGate.length || 1}, 1fr)`,
@@ -427,12 +436,12 @@ function TrackingLookup({ accent = '#f97315' }) {
                           background: gateColor,
                           boxShadow: `0 0 6px ${gateColor}aa`,
                         }} />
-                        Gate {gi + 1}
+                        {t('tracking.gate')} {gi + 1}
                       </span>
                       <span style={{
                         fontFamily: '"JetBrains Mono", monospace',
                         fontSize: 10,
-                        color: 'rgba(255,255,255,0.35)',
+                        color: 'rgba(10,10,10,0.35)',
                       }}>
                         {bucket.length}
                       </span>
@@ -441,7 +450,7 @@ function TrackingLookup({ accent = '#f97315' }) {
                       {bucket.length === 0 && (
                         <div style={{
                           padding: '8px 6px',
-                          color: 'rgba(255,255,255,0.32)',
+                          color: 'rgba(10,10,10,0.32)',
                           fontFamily: '"JetBrains Mono", monospace',
                           fontSize: 11,
                         }}>—</div>
@@ -465,7 +474,7 @@ function TrackingLookup({ accent = '#f97315' }) {
                               marginBottom: 2,
                               fontFamily: '"JetBrains Mono", monospace',
                               fontSize: 11.5,
-                              color: isSel ? '#fff' : 'rgba(255,255,255,0.82)',
+                              color: isSel ? '#0a0a0a' : 'rgba(10,10,10,0.78)',
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
@@ -508,8 +517,8 @@ function TrackingLookup({ accent = '#f97315' }) {
                 style={{
                   marginTop: 18,
                   padding: '16px 18px',
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.12)',
+                  background: '#fafafa',
+                  border: '1px solid rgba(0,0,0,0.08)',
                   borderRadius: 12,
                 }}
               >
@@ -528,7 +537,7 @@ function TrackingLookup({ accent = '#f97315' }) {
                       color: selGateColor,
                     }}>
                       <span style={{ width: 6, height: 6, borderRadius: '50%', background: selGateColor }} />
-                      Gate {selGate + 1}
+                      {t('tracking.gate')} {selGate + 1}
                     </span>
                   )}
                   <span style={{
@@ -537,28 +546,28 @@ function TrackingLookup({ accent = '#f97315' }) {
                     fontSize: 11,
                     letterSpacing: 1.2,
                     textTransform: 'uppercase',
-                    color: 'rgba(255,255,255,0.7)',
+                    color: 'rgba(10,10,10,0.7)',
                   }}>
                     <span style={{
                       width: 8, height: 8, borderRadius: '50%',
                       background: selected.statusColor || accent,
                       boxShadow: `0 0 8px ${selected.statusColor || accent}`,
                     }} />
-                    {selected.status}
+                    {statusLabel(selected.status)}
                   </span>
                 </div>
                 <div style={{
                   fontFamily: '"JetBrains Mono", monospace',
                   fontSize: 14,
-                  color: '#fff',
+                  color: '#0a0a0a',
                   marginBottom: 10,
                   wordBreak: 'break-all',
                 }}>
                   {selected.tracking}
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 13 }}>
-                  <Stat label="Carrier" value={selected.carrier} />
-                  <Stat label="Destination" value={selected.destination} />
+                  <Stat label={t('tracking.carrier')} value={selected.carrier} />
+                  <Stat label={t('tracking.destination')} value={selected.destination} />
                 </div>
               </div>
               );
@@ -788,7 +797,7 @@ function TrackingLookup({ accent = '#f97315' }) {
                     boxShadow: `0 8px 22px rgba(0,0,0,0.45), 0 0 0 4px ${accent}26`,
                   }}
                 >
-                  Click here
+                  {t('tracking.click_here')}
                 </div>
               </div>
             )}
@@ -864,7 +873,7 @@ function TrackingLookup({ accent = '#f97315' }) {
                         {hovered.tracking}
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, fontSize: 11.5 }}>
-                        <TipLine label="Status" value={hovered.status} color={hovered.statusColor} />
+                        <TipLine label="Status" value={statusLabel(hovered.status)} color={hovered.statusColor} />
                         <TipLine label="Dest" value={hovered.destination} />
                       </div>
                     </>
@@ -947,10 +956,10 @@ function Stat({ label, value }) {
         fontSize: 10,
         letterSpacing: 1.2,
         textTransform: 'uppercase',
-        color: 'rgba(255,255,255,0.45)',
+        color: 'rgba(10,10,10,0.45)',
         marginBottom: 3,
       }}>{label}</div>
-      <div style={{ color: '#fff', fontSize: 13 }}>{value}</div>
+      <div style={{ color: '#0a0a0a', fontSize: 13 }}>{value}</div>
     </div>
   );
 }

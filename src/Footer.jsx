@@ -1,9 +1,9 @@
-// Footer for transload — dark themed, used on both the landing page and legal sub-pages.
+// Footer for transload — light themed.
 function Footer({ accent = '#f97315' }) {
   const { lang } = window.useT();
 
   const linkBase = {
-    color: 'rgba(255,255,255,0.62)',
+    color: 'rgba(0,0,0,0.62)',
     textDecoration: 'none',
     fontFamily: '"Inter", system-ui, sans-serif',
     fontSize: 13,
@@ -18,8 +18,8 @@ function Footer({ accent = '#f97315' }) {
   return (
     <footer
       style={{
-        background: '#0a0a0a',
-        borderTop: '1px solid rgba(255,255,255,0.08)',
+        background: '#ffffff',
+        borderTop: '1px solid rgba(0,0,0,0.08)',
         padding: '16px 24px',
         marginTop: 0,
       }}
@@ -38,7 +38,7 @@ function Footer({ accent = '#f97315' }) {
         <p
           style={{
             margin: 0,
-            color: 'rgba(255,255,255,0.45)',
+            color: 'rgba(0,0,0,0.45)',
             fontFamily: '"Inter", system-ui, sans-serif',
             fontSize: 12,
             letterSpacing: 0.1,

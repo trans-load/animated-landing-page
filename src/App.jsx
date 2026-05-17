@@ -16,8 +16,19 @@ function App() {
   const [progress, setProgress] = useStateApp(0); // 0..1 over the transition window
   const [scrolled, setScrolled] = useStateApp(false);
   const [heroInView, setHeroInView] = useStateApp(true); // hero section still touching viewport
-  const [chipAnchors, setChipAnchors] = useStateApp({}); // {front,mid,back -> {x,y,onScreen}}
+  // Live clock for the CCTV timestamp overlay during the intro phase.
+  const [now, setNow] = useStateApp(() => new Date());
+  useEffectApp(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
   const heroRef = useRefApp(null);
+  const videoRef = useRefApp(null);
+  // Ref on the hero text container so the scroll rAF can mutate the
+  // `--p` CSS variable directly. CSS clamp()s drive every per-char
+  // opacity/translate off that single variable — no React reconciliation
+  // of the 30+ char spans on every scroll event.
+  const heroTextRef = useRefApp(null);
   const { lang, t } = window.useT();
 
   // Tweak host integration
@@ -59,6 +70,25 @@ function App() {
       // the viewport. Used to fade the mobile position:fixed indicator
       // once the user has scrolled past the hero section entirely.
       setHeroInView(rect.bottom > 80);
+      // Drive the hero video frame from scroll. The first 15% of the
+      // scroll is the intro (monitor scaling up) — during that, the
+      // video stays paused at frame 0. After progress 0.15, the
+      // remaining 85% maps to the full video duration.
+      const v = videoRef.current;
+      if (v && v.duration && isFinite(v.duration)) {
+        const INTRO_END = 0.15;
+        const videoP = p < INTRO_END ? 0 : (p - INTRO_END) / (1 - INTRO_END);
+        const target = videoP * v.duration;
+        if (Math.abs(v.currentTime - target) > 1 / 48) {
+          v.currentTime = target;
+        }
+      }
+      // Mutate the CSS `--p` on the hero text container directly. The
+      // per-char opacity/translate calc lives in CSS (clamp/calc on
+      // --p, --t, --w) so we avoid React reconciling 30+ char spans
+      // on every scroll event.
+      const tx = heroTextRef.current;
+      if (tx) tx.style.setProperty('--p', String(p));
     };
     const onScroll = () => {
       if (scheduled) return;
@@ -73,29 +103,41 @@ function App() {
     };
   }, []);
 
-  // Computed visibility / opacities
-  // Crossfade happens in the first 30% of scroll: photo fades out, cloud fades in.
-  // After that, the cloud is fully visible and the camera continues dollying back.
-  const fadeWindow = 0.3;
-  const fadeT = Math.min(1, progress / fadeWindow);
-  const photoOpacity = Math.max(0, 1 - fadeT);
-  const cloudOpacity = fadeT;
-  // Subtle photo zoom on push-in mode
-  const photoScale = tweaks.transition === 'zoom' ? 1 + progress * 0.5 : 1 + progress * 0.08;
+  // iOS Safari won't render a frame from currentTime updates until the
+  // video has been played at least once. Prime it by calling play() then
+  // immediately pause()-ing on the first metadata load. muted + playsInline
+  // makes this allowed without a user gesture.
+  useEffectApp(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    const prime = () => {
+      const promise = v.play();
+      if (promise && typeof promise.then === 'function') {
+        promise.then(() => v.pause()).catch(() => {});
+      } else {
+        try { v.pause(); } catch (e) {}
+      }
+    };
+    if (v.readyState >= 1) prime();
+    else v.addEventListener('loadedmetadata', prime, { once: true });
+  }, []);
 
   const bgColor =
-    tweaks.bg === 'light' ? '#e9e7e2' : tweaks.bg === 'mid' ? '#1a1a1d' : '#0a0a0a';
+    tweaks.bg === 'light' ? '#e9e7e2' : tweaks.bg === 'mid' ? '#1a1a1d' : '#ffffff';
 
   return (
-    <div style={{ background: bgColor, color: '#fff', minHeight: '100vh' }}>
+    <div style={{ background: bgColor, color: '#0a0a0a', minHeight: '100vh' }}>
       <Header accent={tweaks.accent} scrolled={scrolled} />
 
-      {/* Hero: tall sticky section, drives the scroll transition */}
+      {/* Hero: tall sticky section, drives the scroll transition.
+          Longer scroll range = each scroll inch advances fewer video
+          frames, which makes the scrub feel slower and smoother (the
+          user's "half-speed" request) without re-encoding the file. */}
       <section
         ref={heroRef}
         style={{
           position: 'relative',
-          height: '160vh', // scroll length for the transition
+          height: '220vh', // 120vh of scroll range = video advances ~5x slower per pixel
         }}
       >
         <div
@@ -105,50 +147,245 @@ function App() {
             height: '100vh',
             width: '100%',
             overflow: 'hidden',
+            background: '#000', // shutter-closed backdrop while the clip-path circle opens
           }}
         >
-          {/* Hero scene: WebGL point cloud + photo plane that dissolves into it */}
-          <div
-            className="hero-scene"
-            style={{
-              position: 'absolute',
-              inset: 0,
-              willChange: 'opacity, transform',
-            }}
-          >
-            {/* Original photo as a DOM image — no WebGL filtering or resampling. */}
-            <img
-              src="assets/warehouse.png?v=6"
-              alt="Loading dock with pallets viewed from a ceiling-mounted security camera"
+          {/* Intro phase: at scroll 0 the hero video sits as a small
+              "CCTV monitor" in the center of the dark stage; as the
+              user scrolls through the first 15% of the hero, it scales
+              up to fill the viewport. Once full-size, the existing
+              scroll-bound playback takes over.
+                progress 0    → monitor at scale 0.32, rounded corners
+                progress 0.15 → fullscreen, square corners */}
+          {(() => {
+            const INTRO_END = 0.15;
+            const introT = Math.max(0, Math.min(1, progress / INTRO_END));
+            const scale = 0.58 + introT * 0.42;
+            const radius = (1 - introT) * 16;
+            const monitorOpacity = 1 - introT;
+            return (
+              <>
+                {/* SCROLL prompt below the monitor — the only scroll
+                    animation now. Fades out as the monitor reaches
+                    full size. */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: '5vh',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    opacity: monitorOpacity,
+                    pointerEvents: 'none',
+                    fontFamily: '"JetBrains Mono", monospace',
+                    fontSize: 14,
+                    fontWeight: 600,
+                    letterSpacing: 3,
+                    textTransform: 'uppercase',
+                    color: 'rgba(255,255,255,0.85)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 14,
+                    transition: 'opacity 160ms linear',
+                    zIndex: 5,
+                  }}
+                >
+                  <span>Scroll</span>
+                  <svg width="24" height="36" viewBox="0 0 24 36" fill="none" aria-hidden="true">
+                    <rect x="1" y="1" width="22" height="34" rx="11" stroke="currentColor" strokeWidth="1.5" />
+                    <circle cx="12" cy="10" r="2.5" fill="currentColor">
+                      <animate attributeName="cy" values="10;22;10" dur="1.6s" repeatCount="indefinite" />
+                    </circle>
+                  </svg>
+                </div>
+
+                {/* Hero scene — scaled during intro, scroll-bound after. */}
+                <div
+                  className="hero-scene"
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    transform: `scale(${scale})`,
+                    transformOrigin: 'center center',
+                    borderRadius: `${radius}px`,
+                    overflow: 'hidden',
+                    // Pure dark drop shadow — no white outline (it was
+                    // showing through as a subtle bright sliver at the
+                    // rounded bottom corners on mobile).
+                    boxShadow: introT < 1
+                      ? `0 36px 90px rgba(0,0,0,${0.55 * (1 - introT)})`
+                      : 'none',
+                    transition: 'transform 60ms linear, border-radius 60ms linear, box-shadow 120ms linear',
+                  }}
+                >
+            <video
+              ref={videoRef}
+              muted
+              playsInline
+              preload="auto"
+              aria-hidden="true"
+              poster="assets/warehouse.png?v=6"
+              src={typeof window !== 'undefined' && window.innerWidth <= 720
+                ? 'assets/hero-mobile.mp4'
+                : 'assets/hero.mp4'}
               style={{
                 position: 'absolute',
                 inset: 0,
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover',
-                opacity: Math.max(0, 1 - Math.max(0, progress - 0.05) / 0.35),
-                transition: 'opacity 60ms linear',
                 pointerEvents: 'none',
               }}
             />
-            <PointCloud
-              progress={progress}
-              visible={true}
-              pointSize={tweaks.pointSize}
-              accent={tweaks.accent}
-              autoRotate={false}
-              onAnchorProject={setChipAnchors}
+            {/* CCTV overlay set — visible during the intro phase, fades
+                out once the monitor reaches full size:
+                  • REC badge   (top-left)
+                  • Timestamp   (top-right, ticking live)
+                  • CAM label   (bottom-left)
+                  • Scanlines   (subtle horizontal interlace pattern) */}
+            <div
+              className="cctv-rec"
+              style={{
+                position: 'absolute',
+                top: 36,
+                left: 40,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 18,
+                padding: '18px 30px 18px 26px',
+                borderRadius: 8,
+                background: 'rgba(0,0,0,0.6)',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+                border: '1px solid rgba(255,255,255,0.14)',
+                fontFamily: '"JetBrains Mono", monospace',
+                fontSize: 34,
+                fontWeight: 700,
+                letterSpacing: 3.2,
+                color: '#ffffff',
+                textTransform: 'uppercase',
+                pointerEvents: 'none',
+                opacity: monitorOpacity,
+                transition: 'opacity 160ms linear',
+                zIndex: 6,
+              }}
+            >
+              <span
+                style={{
+                  width: 22,
+                  height: 22,
+                  borderRadius: '50%',
+                  background: '#ff3b30',
+                  boxShadow: '0 0 18px rgba(255,59,48,0.95)',
+                  animation: 'cctvPulse 1.4s ease-in-out infinite',
+                }}
+              />
+              REC
+            </div>
+
+            {/* Live timestamp — top-right */}
+            <div
+              className="cctv-timestamp"
+              style={{
+                position: 'absolute',
+                top: 36,
+                right: 40,
+                padding: '18px 26px',
+                borderRadius: 8,
+                background: 'rgba(0,0,0,0.6)',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+                border: '1px solid rgba(255,255,255,0.14)',
+                fontFamily: '"JetBrains Mono", monospace',
+                fontSize: 34,
+                fontWeight: 700,
+                letterSpacing: 3.2,
+                color: '#ffffff',
+                textTransform: 'uppercase',
+                pointerEvents: 'none',
+                opacity: monitorOpacity,
+                transition: 'opacity 160ms linear',
+                zIndex: 6,
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              {(() => {
+                const pad = (n) => String(n).padStart(2, '0');
+                const Y = now.getFullYear();
+                const M = pad(now.getMonth() + 1);
+                const D = pad(now.getDate());
+                const h = pad(now.getHours());
+                const m = pad(now.getMinutes());
+                const s = pad(now.getSeconds());
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1.15, gap: 4 }}>
+                    <span>{`${Y}-${M}-${D}`}</span>
+                    <span>{`${h}:${m}:${s}`}</span>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* CAM identifier — bottom-left */}
+            <div
+              className="cctv-cam"
+              style={{
+                position: 'absolute',
+                bottom: 36,
+                left: 40,
+                padding: '18px 26px',
+                borderRadius: 8,
+                background: 'rgba(0,0,0,0.6)',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)',
+                border: '1px solid rgba(255,255,255,0.14)',
+                fontFamily: '"JetBrains Mono", monospace',
+                fontSize: 34,
+                fontWeight: 700,
+                letterSpacing: 3.2,
+                color: '#ffffff',
+                textTransform: 'uppercase',
+                pointerEvents: 'none',
+                opacity: monitorOpacity,
+                transition: 'opacity 160ms linear',
+                zIndex: 6,
+              }}
+            >
+              CAM-01 · DOCK-A
+            </div>
+
+            {/* CRT scanlines — subtle horizontal interlace pattern that
+                fades out with the rest of the CCTV chrome. */}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                pointerEvents: 'none',
+                opacity: monitorOpacity * 0.55,
+                background:
+                  'repeating-linear-gradient(0deg, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px, transparent 1px, transparent 3px)',
+                mixBlendMode: 'multiply',
+                transition: 'opacity 160ms linear',
+                zIndex: 5,
+              }}
             />
-            {/* Bottom gradient for hero copy legibility */}
+            {/* Legibility scrim: radial vignette anchored low (where the
+                headline sits) + a bottom gradient so the text reads
+                cleanly against any video frame. */}
             <div
               style={{
                 position: 'absolute', inset: 0,
                 background:
-                  'linear-gradient(to bottom, rgba(0,0,0,0) 55%, rgba(0,0,0,0.55) 100%)',
+                  `radial-gradient(ellipse 85% 55% at 50% 75%, rgba(0,0,0,${0.7 - progress * 0.3}) 0%, rgba(0,0,0,${0.35 - progress * 0.2}) 55%, rgba(0,0,0,0) 85%), ` +
+                  'linear-gradient(to bottom, rgba(0,0,0,0) 35%, rgba(0,0,0,0.35) 75%, rgba(0,0,0,0.65) 100%)',
                 pointerEvents: 'none',
+                transition: 'background 100ms linear',
               }}
             />
-          </div>
+                </div>
+              </>
+            );
+          })()}
 
           {/* Hero copy */}
           <div
@@ -196,196 +433,318 @@ function App() {
             </div>
           </div>
 
-          {/* Scroll-reveal headline — appears as point cloud settles, positioned centered below the cloud */}
-          {true && (
-            <div
-              style={{
-                position: 'absolute',
-                left: 0,
-                right: 0,
-                bottom: '4vh',
-                display: 'flex',
-                justifyContent: 'center',
-                pointerEvents: 'none',
-                opacity: Math.max(0, Math.min(1, (progress - 0.5) / 0.25)),
-                transform: `translateY(${Math.max(0, 30 - progress * 60)}px)`,
-                transition: 'opacity 200ms linear',
-              }}
-            >
+          {/* Hero text — sits in front of the scroll-bound video, vertically
+              centered. YC pill fades in cleanly, then the headline reveals
+              letter-by-letter via `splitChars`. Each glyph carries its own
+              `animation-delay` so the stagger is computed in render. */}
+          {(() => {
+            // Two-phase scroll-tied letter reveal. Line 1 reveals during
+            // the first burst of scroll; the user pauses (video continues
+            // playing through), then a second scroll reveals line 2.
+            //   Phase 1: progress 0.00 → 0.30 → line 1 chars fade in
+            //   Gap:     progress 0.30 → 0.50 → nothing reveals, video plays
+            //   Phase 2: progress 0.50 → 0.85 → line 2 chars fade in
+            // Letter reveals start after the intro phase (progress 0.15)
+            // so no text bleeds onto the small CCTV monitor.
+            const PHASE1_START = 0.18;
+            const PHASE1_END = 0.42;
+            const PHASE2_START = 0.55;
+            const PHASE2_END = 0.85;
+            const CHAR_WINDOW = 0.05;
+            const line1Pre = t('hero.headline.line1') || '';
+            const intoPre = t('hero.headline.into') || '';
+            const dimPre = t('hero.headline.dimensioners') || '';
+            // Each char carries its trigger `--t` (the progress point at
+            // which it should start fading in) and the reveal window `--w`
+            // as CSS custom properties. CSS clamp() in index.html turns
+            // those plus the parent's `--p` (set by the scroll rAF) into
+            // opacity + translateY. No React re-render of the chars when
+            // progress changes — only the parent's `--p` is mutated, in
+            // place, via heroTextRef. That's the smoothness fix.
+            // Linear color interpolation between gradient stops. Each
+            // char gets a solid rgb() — adjacent chars sample neighboring
+            // points along the ramp, which reads as a smooth color fade
+            // across the word. Robust across browsers (no background-clip
+            // text gymnastics; no inline-block clip-propagation issues).
+            const lerpColor = (p, stops) => {
+              for (let k = 0; k < stops.length - 1; k++) {
+                const a = stops[k], b = stops[k + 1];
+                if (p <= b.p) {
+                  const tt = (p - a.p) / Math.max(1e-6, b.p - a.p);
+                  const r = Math.round(a.rgb[0] + (b.rgb[0] - a.rgb[0]) * tt);
+                  const g = Math.round(a.rgb[1] + (b.rgb[1] - a.rgb[1]) * tt);
+                  const bv = Math.round(a.rgb[2] + (b.rgb[2] - a.rgb[2]) * tt);
+                  return `rgb(${r}, ${g}, ${bv})`;
+                }
+              }
+              const last = stops[stops.length - 1];
+              return `rgb(${last.rgb.join(', ')})`;
+            };
+            // Wrap each WORD in inline-block + nowrap so chars within a
+            // word can't break across lines; let the wrapper wrap at the
+            // regular spaces between words. The phase trigger spans
+            // `totalChars` slots even when the call only renders a slice
+            // (starting at `charOffset`), so two adjacent splitChars
+            // calls — e.g., "into " + "warehouse intelligence" — share
+            // one continuous reveal timeline across phase 2.
+            const splitChars = (text, startProg, endProg, totalChars, charOffset, gradient = null, keyPrefix = '') => {
+              if (!text) return null;
+              const N = [...text].length;
+              const spread = Math.max(1e-6, endProg - startProg - CHAR_WINDOW);
+              const perCharProg = totalChars > 1 ? spread / (totalChars - 1) : 0;
+              let phasePos = charOffset;
+              let localPos = 0;
+              const tokens = text.split(/(\s+)/);
+              return tokens.map((token, wi) => {
+                if (!token) return null;
+                if (/^\s+$/.test(token)) {
+                  phasePos += token.length;
+                  localPos += token.length;
+                  return ' ';
+                }
+                return (
+                  <span
+                    key={`w-${keyPrefix}-${wi}`}
+                    style={{ display: 'inline-block', whiteSpace: 'nowrap' }}
+                  >
+                    {[...token].map((ch, i) => {
+                      const charColor = gradient
+                        ? lerpColor(N > 1 ? localPos / (N - 1) : 0, gradient)
+                        : undefined;
+                      const trigger = startProg + phasePos * perCharProg;
+                      phasePos += 1;
+                      localPos += 1;
+                      return (
+                        <span
+                          key={i}
+                          className="hero-char"
+                          style={{
+                            '--t': trigger,
+                            '--w': CHAR_WINDOW,
+                            color: charColor,
+                          }}
+                        >
+                          {ch}
+                        </span>
+                      );
+                    })}
+                  </span>
+                );
+              });
+            };
+            const line1 = line1Pre;
+            const intoText = intoPre;
+            const dimText = dimPre;
+            // Line 2 is treated as one continuous string for trigger
+            // spacing so the chars in "into " and "warehouse intelligence"
+            // form one smooth reveal across phase 2. The gradient is then
+            // applied only to the dimText portion via separate render.
+            const line2Full = (intoText ? intoText + ' ' : '') + dimText;
+            return (
               <div
+                ref={heroTextRef}
+                className="hero-text"
                 style={{
-                  fontFamily: '"Inter", system-ui, sans-serif',
-                  fontWeight: 500,
-                  fontSize: 'clamp(28px, 3.8vw, 56px)',
-                  lineHeight: 1.1,
-                  letterSpacing: -1,
-                  color: '#fff',
-                  textAlign: 'center',
-                  textShadow: '0 2px 30px rgba(0,0,0,0.6)',
-                  maxWidth: '92vw',
+                  position: 'absolute',
+                  inset: 0,
+                  display: 'flex',
+                  alignItems: 'flex-end',
+                  justifyContent: 'center',
+                  paddingBottom: '8vh',
+                  pointerEvents: 'none',
                 }}
               >
+                {/* YC backing now lives in the trust strip below and (next)
+                    as a small chip in the header — keeps the hero focused
+                    on the product value prop. */}
                 <div
+                  className="hero-headline-wrap"
                   style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    padding: '5px 12px 5px 9px',
-                    borderRadius: 999,
-                    background: '#ffffff',
-                    border: '1px solid rgba(0,0,0,0.06)',
-                    boxShadow: '0 4px 14px rgba(0,0,0,0.35)',
-                    fontSize: 12.5,
-                    letterSpacing: -0.1,
-                    marginBottom: 20,
-                    textShadow: 'none',
+                    fontFamily: '"Inter", system-ui, sans-serif',
+                    fontWeight: 700,
+                    // Smaller min so the text doesn't blow out the viewport
+                    // on narrow phones. em-based letter-spacing scales
+                    // with the font size so per-char tightness reads the
+                    // same on mobile and desktop.
+                    fontSize: 'clamp(34px, 8vw, 108px)',
+                    lineHeight: 0.98,
+                    letterSpacing: '-0.032em',
+                    color: '#fff',
+                    textAlign: 'center',
+                    textWrap: 'balance',
+                    maxWidth: '92vw',
+                    fontVariantLigatures: 'none',
                   }}
                 >
-                  <span style={{ color: '#6b6b6b', fontWeight: 400 }}>{t('hero.yc.backed_by')}</span>
-                  <img
-                    src="assets/yc-logo-expanded-orange.png"
-                    alt="Y Combinator"
-                    style={{ height: 16, width: 'auto', display: 'block', borderRadius: 0 }}
-                  />
-                </div>
-                <h1 style={{ margin: 0, font: 'inherit', color: 'inherit', letterSpacing: 'inherit' }}>
-                  <span style={{ display: 'block' }}>{t('hero.headline.line1')}</span>
+                <h1 className="hero-headline" style={{ margin: 0, font: 'inherit', color: 'inherit', letterSpacing: 'inherit' }}>
+                  {/* Phase 1: line 1 reveals across progress 0.00 → 0.30 */}
+                  <span style={{ display: 'block' }}>
+                    {splitChars(line1, PHASE1_START, PHASE1_END, [...line1].length, 0, null, 'l1')}
+                  </span>
+                  {/* Phase 2: line 2 reveals across progress 0.50 → 0.85.
+                      "into " (no gradient) and "warehouse intelligence"
+                      (gradient) share one continuous reveal timeline
+                      by passing the same totalChars + offsetting the
+                      second call by intoSpaced.length. */}
                   <span style={{ display: 'block', marginTop: 6 }}>
-                    {t('hero.headline.into') && <>{t('hero.headline.into')}{' '}</>}
-                    <span
-                      style={{
-                        background: 'linear-gradient(90deg, #ffb070 0%, #f97315 55%, #c95808 100%)',
-                        WebkitBackgroundClip: 'text',
-                        backgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        color: 'transparent',
-                      }}
-                    >
-                      {t('hero.headline.dimensioners')}
-                    </span>
+                    {intoText && splitChars(
+                      intoText + ' ',
+                      PHASE2_START, PHASE2_END,
+                      [...line2Full].length, 0,
+                      null, 'l2-into',
+                    )}
+                    {splitChars(
+                      dimText,
+                      PHASE2_START, PHASE2_END,
+                      [...line2Full].length,
+                      intoText ? [...intoText + ' '].length : 0,
+                      [
+                        { p: 0,    rgb: [255, 176, 112] },
+                        { p: 0.55, rgb: [249, 115, 21]  },
+                        { p: 1,    rgb: [201, 88, 8]    },
+                      ],
+                      'l2-dim',
+                    )}
                   </span>
                 </h1>
               </div>
             </div>
-          )}
+            );
+          })()}
 
-          {/* Scroll hint - fades on first scroll */}
-          <div
-            style={{
-              position: 'absolute',
-              left: '50%',
-              bottom: 16,
-              transform: 'translateX(-50%)',
-              opacity: Math.max(0, 1 - progress * 4),
-              fontFamily: '"JetBrains Mono", monospace',
-              fontSize: 10,
-              letterSpacing: 2,
-              color: 'rgba(255,255,255,0.7)',
-              textTransform: 'uppercase',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 6,
-              pointerEvents: 'none',
-            }}
-          >
-            <span>{t('hero.scroll')}</span>
-            <svg width="14" height="20" viewBox="0 0 14 20" fill="none">
-              <rect x="1" y="1" width="12" height="18" rx="6" stroke="currentColor" strokeWidth="1" />
-              <circle cx="7" cy="6" r="1.5" fill="currentColor">
-                <animate attributeName="cy" values="6;12;6" dur="1.6s" repeatCount="indefinite" />
-              </circle>
-            </svg>
-          </div>
-
-          {/* Second scroll cue — appears during the reveal/rotate phase
-              so the user knows the animation is still driven by scroll
-              and keeps going. Opacity peaks at progress ~0.7 and fades
-              out as we approach the end of the hero scroll. */}
-          <div
-            style={{
-              position: 'absolute',
-              left: '50%',
-              bottom: 28,
-              transform: 'translateX(-50%)',
-              opacity: Math.max(0, Math.min(1, (progress - 0.5) / 0.15) - Math.max(0, (progress - 0.85) / 0.1)),
-              fontFamily: '"JetBrains Mono", monospace',
-              fontSize: 10,
-              letterSpacing: 2,
-              color: 'rgba(255,255,255,0.7)',
-              textTransform: 'uppercase',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 6,
-              pointerEvents: 'none',
-              transition: 'opacity 120ms linear',
-            }}
-          >
-            <span>{t('hero.scroll')}</span>
-            <svg width="14" height="20" viewBox="0 0 14 20" fill="none" aria-hidden="true">
-              <path d="M7 3 L7 15 M2 10 L7 15 L12 10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-                <animate attributeName="opacity" values="0.4;1;0.4" dur="1.6s" repeatCount="indefinite" />
-              </path>
-            </svg>
-          </div>
+          {/* Scroll cues moved into the intro phase above — only one
+              scroll animation now, instead of three. */}
         </div>
-
-        {/* Per-item dimension chips — 3D-anchored in the point cloud so they
-            follow the boxes across camera rotation and viewport changes. */}
-        {(() => { const BBOX_COLOR = '#22a7f0'; return [
-          { key: 'front', dims: t('hero.chip.front') },
-          { key: 'mid',   dims: t('hero.chip.mid')   },
-          { key: 'back',  dims: t('hero.chip.back')  },
-        ].map((chip) => {
-          const anchor = chipAnchors[chip.key];
-          const visible = progress >= 0.5 && progress <= 0.88 && anchor && anchor.onScreen;
-          const x = anchor ? anchor.x : 0;
-          const y = anchor ? anchor.y : 0;
-          return (
-            <div
-              key={chip.key}
-              style={{
-                position: 'fixed',
-                left: 0,
-                top: 0,
-                zIndex: 40,
-                opacity: visible ? 1 : 0,
-                // Center chip horizontally on anchor, sit it ~22px above the box.
-                transform: `translate3d(${x}px, ${y}px, 0) translate(-50%, calc(-100% - 22px))${visible ? '' : ' translateY(8px)'}`,
-                transition: 'opacity 400ms ease',
-                pointerEvents: 'none',
-                padding: '8px 12px',
-                borderRadius: 10,
-                background: 'rgba(10, 10, 12, 0.72)',
-                backdropFilter: 'blur(14px) saturate(140%)',
-                WebkitBackdropFilter: 'blur(14px) saturate(140%)',
-                border: `1px solid ${BBOX_COLOR}`,
-                boxShadow: `0 8px 24px rgba(0,0,0,0.45), 0 0 0 1px ${BBOX_COLOR}22`,
-                fontFamily: '"JetBrains Mono", monospace',
-                fontSize: 12,
-                color: 'rgba(255,255,255,0.92)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                whiteSpace: 'nowrap',
-                willChange: 'transform, opacity',
-              }}
-            >
-              <span style={{
-                width: 6, height: 6, borderRadius: '50%', background: tweaks.accent,
-                boxShadow: `0 0 8px ${tweaks.accent}`, flexShrink: 0,
-              }} />
-              <span>{chip.dims}</span>
-            </div>
-          );
-        }); })()}
       </section>
+      {/* BACKED BY — black band on the sides. The white YC tile is
+          centered and straddles the boundary between this black band
+          and the white trust strip below: chamfered top corners cut
+          into the black, flat bottom merges seamlessly into the white.
+          Same white as the rest of the page (#ffffff), no shadow or
+          border, so it reads as a single continuous white surface
+          rising into the black band like a podium. */}
+      {/* BACKED BY — slim section divider with a YC tab cutout. The
+          band itself is just tall enough to contain the original
+          brief-spec notch (32px deep) plus a thin dark margin above.
+          Wrapper background is white so it shows through the notch. */}
+      <div style={{ position: 'relative', background: '#ffffff' }}>
+        {/* Desktop register-tab path — notch is ~26% of viewBox width
+            so on wide viewports it sits comfortably under the YC badge. */}
+        <svg
+          className="register-tab register-tab--desktop"
+          width="100%"
+          height="100"
+          viewBox="0 0 680 100"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+          style={{ display: 'block' }}
+        >
+          <path
+            d="M 0 0
+               L 680 0
+               L 680 80
+               L 430 80
+               Q 420 80 416 74
+               L 396 38
+               Q 392 32 382 32
+               L 298 32
+               Q 288 32 284 38
+               L 264 74
+               Q 260 80 250 80
+               L 0 80 Z"
+            fill="#040404"
+          />
+        </svg>
+        {/* Mobile register-tab path — proportionally wider notch
+            (~52% of viewBox) so the badge still fits inside it on
+            narrow viewports. */}
+        <svg
+          className="register-tab register-tab--mobile"
+          width="100%"
+          height="92"
+          viewBox="0 0 420 92"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+          style={{ display: 'block' }}
+        >
+          <path
+            d="M 0 0
+               L 420 0
+               L 420 72
+               L 340 72
+               Q 330 72 326 66
+               L 304 46
+               Q 300 40 290 40
+               L 130 40
+               Q 120 40 116 46
+               L 94 66
+               Q 90 72 80 72
+               L 0 72 Z"
+            fill="#040404"
+          />
+        </svg>
+        <a
+          href="https://www.ycombinator.com/companies/transload"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Backed by Y Combinator"
+          className="yc-badge"
+          style={{
+            position: 'absolute',
+            left: '50%',
+            // Anchor the badge near the upper portion of the notch
+            // interior (slightly above its geometric center) so it
+            // reads as "a bit up" inside the tab.
+            top: 56,
+            transform: 'translate(-50%, -50%)',
+            // Notch interior on desktop: y=32 (ceiling) to y=80 (opening),
+            // center y=56 in CSS px (SVG height 100). On mobile the
+            // SVG is 92 tall so we override top via media query.
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            textDecoration: 'none',
+          }}
+        >
+          <span
+            style={{
+              fontFamily: '"Inter", system-ui, sans-serif',
+              fontSize: 14,
+              fontWeight: 400,
+              letterSpacing: -0.1,
+              color: '#6b6b6b',
+              lineHeight: 1,
+            }}
+          >
+            Backed by
+          </span>
+          <img
+            src="assets/yc-logo.svg"
+            alt=""
+            aria-hidden="true"
+            style={{ height: 20, width: 20, display: 'block', borderRadius: 3 }}
+          />
+          <span
+            style={{
+              fontFamily: '"Inter", system-ui, sans-serif',
+              fontSize: 15,
+              fontWeight: 500,
+              letterSpacing: -0.3,
+              color: '#0a0a0a',
+              lineHeight: 1,
+            }}
+          >
+            Combinator
+          </span>
+        </a>
+      </div>
+
       <section
         className="trust-section"
         style={{
           padding: '56px 40px 64px',
           overflow: 'hidden',
+          background: '#ffffff',
         }}
       >
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
@@ -395,7 +754,7 @@ function App() {
               fontSize: 11,
               letterSpacing: 2.5,
               textTransform: 'uppercase',
-              color: '#8a8a85',
+              color: '#6b6b6b',
               marginBottom: 20,
               textAlign: 'center',
             }}
@@ -417,7 +776,7 @@ function App() {
                 position: 'absolute',
                 top: 0, bottom: 0, left: 0,
                 width: 80,
-                background: 'linear-gradient(90deg, #0a0a0a 0%, rgba(10,10,10,0) 100%)',
+                background: 'linear-gradient(90deg, #ffffff 0%, rgba(255,255,255,0) 100%)',
                 pointerEvents: 'none',
                 zIndex: 2,
               }}
@@ -428,7 +787,7 @@ function App() {
                 position: 'absolute',
                 top: 0, bottom: 0, right: 0,
                 width: 80,
-                background: 'linear-gradient(270deg, #0a0a0a 0%, rgba(10,10,10,0) 100%)',
+                background: 'linear-gradient(270deg, #ffffff 0%, rgba(255,255,255,0) 100%)',
                 pointerEvents: 'none',
                 zIndex: 2,
               }}
@@ -444,7 +803,7 @@ function App() {
             >
               {[...Array(2)].flatMap((_, dup) => (
                 [
-                  { f: 'yc.png', url: 'https://www.ycombinator.com', scale: 0.85 },
+                  // YC moved to its own dedicated "BACKED BY" row above
                   { f: 'wahl-co.png', url: 'https://www.wahl.co/en', scale: 1.0 },
                   { f: 'wolf.png', url: 'https://www.wolf-straubing.de/', scale: 1.0 },
                   { f: 'koch.png', url: 'https://www.koch-international.de', scale: 1.0 },
@@ -499,9 +858,12 @@ function App() {
               transform: translateZ(0);
               backface-visibility: hidden;
             }
+            /* On white background, drop the invert. Grayscale only,
+               so logos read as dark monochrome on white. Originals
+               that need to stay light (tone='light') invert + grayscale. */
             .trust-logo {
-              filter: invert(1) grayscale(1);
-              opacity: 0.95;
+              filter: grayscale(1);
+              opacity: 0.7;
               transition: opacity 220ms ease, transform 220ms ease, filter 220ms ease;
             }
             @media (max-width: 720px) {
@@ -511,7 +873,7 @@ function App() {
               .trust-logo { height: 28px !important; max-height: 28px; }
             }
             .trust-logo--light {
-              filter: grayscale(1);
+              filter: invert(1) grayscale(1);
             }
             .trust-logo:hover {
               filter: none;
@@ -519,7 +881,7 @@ function App() {
               transform: scale(1.06);
             }
             .trust-logo--keep:hover {
-              filter: invert(1) grayscale(1);
+              filter: grayscale(1);
             }
           `}</style>
         </div>
@@ -531,8 +893,8 @@ function App() {
         className="install-section"
         style={{
           padding: '112px 40px 96px',
-          background: '#0a0a0a',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
+          background: '#ffffff',
+          borderTop: '1px solid rgba(0,0,0,0.06)',
         }}
       >
         <div style={{ maxWidth: 1240, margin: '0 auto' }}>
@@ -544,7 +906,7 @@ function App() {
               lineHeight: 1.08,
               letterSpacing: -1.2,
               margin: 0,
-              color: '#ffffff',
+              color: '#0a0a0a',
             }}
           >
             {t('install.headline.line1')}
@@ -610,6 +972,9 @@ function App() {
           </div>
           {/* Card styling + responsive: stack to 1 column on phones. */}
           <style>{`
+            /* Light-theme install cards: soft white surface with a hint
+               of orange tint, low-key shadows, dark text. The accent
+               (orange) is the same; everything around it lifts up. */
             .install-card {
               position: relative;
               display: flex;
@@ -618,15 +983,13 @@ function App() {
               min-height: 340px;
               border-radius: 22px;
               background:
-                radial-gradient(140% 90% at 0% 0%, rgba(249,115,21,0.10) 0%, rgba(249,115,21,0) 55%),
-                radial-gradient(120% 100% at 100% 100%, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0) 60%),
-                linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 100%);
+                radial-gradient(140% 90% at 0% 0%, rgba(249,115,21,0.08) 0%, rgba(249,115,21,0) 55%),
+                linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
               box-shadow:
-                0 1px 0 rgba(255,255,255,0.07) inset,
-                0 0 0 1px rgba(255,255,255,0.10),
-                0 24px 56px rgba(0,0,0,0.55),
-                0 6px 14px rgba(0,0,0,0.35),
-                0 10px 40px rgba(249,115,21,0.06);
+                0 1px 0 rgba(255,255,255,0.9) inset,
+                0 0 0 1px rgba(0,0,0,0.06),
+                0 16px 36px rgba(0,0,0,0.06),
+                0 4px 10px rgba(0,0,0,0.04);
               text-decoration: none;
               color: inherit;
               transition: transform 380ms cubic-bezier(0.2, 0.7, 0.2, 1), background 380ms ease, box-shadow 380ms ease;
@@ -641,36 +1004,20 @@ function App() {
               height: 2px;
               border-radius: 0 0 6px 6px;
               background: linear-gradient(90deg, rgba(249,115,21,0) 0%, rgba(249,115,21,0.55) 50%, rgba(249,115,21,0) 100%);
-              opacity: 0.7;
+              opacity: 0.65;
               transition: opacity 380ms ease, height 380ms ease, background 380ms ease, left 380ms ease, right 380ms ease;
-            }
-            .install-card::after {
-              content: '';
-              position: absolute;
-              inset: 0;
-              border-radius: 22px;
-              padding: 1px;
-              background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0.02) 100%);
-              -webkit-mask:
-                linear-gradient(#000 0 0) content-box,
-                linear-gradient(#000 0 0);
-              -webkit-mask-composite: xor;
-                      mask-composite: exclude;
-              pointer-events: none;
-              transition: background 380ms ease;
             }
             a.install-card:hover {
               transform: translateY(-8px);
               background:
-                radial-gradient(140% 90% at 0% 0%, rgba(249,115,21,0.22) 0%, rgba(249,115,21,0) 55%),
-                radial-gradient(120% 100% at 100% 100%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 60%),
-                linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+                radial-gradient(140% 90% at 0% 0%, rgba(249,115,21,0.16) 0%, rgba(249,115,21,0) 55%),
+                linear-gradient(180deg, #ffffff 0%, #fff7f0 100%);
               box-shadow:
-                0 1px 0 rgba(255,255,255,0.10) inset,
-                0 0 0 1px rgba(249,115,21,0.40),
-                0 36px 80px rgba(0,0,0,0.65),
-                0 10px 24px rgba(0,0,0,0.45),
-                0 12px 50px rgba(249,115,21,0.30);
+                0 1px 0 rgba(255,255,255,1) inset,
+                0 0 0 1px rgba(249,115,21,0.35),
+                0 28px 64px rgba(0,0,0,0.10),
+                0 8px 20px rgba(0,0,0,0.06),
+                0 10px 40px rgba(249,115,21,0.20);
             }
             a.install-card:hover::before {
               left: 0;
@@ -678,9 +1025,6 @@ function App() {
               height: 3px;
               opacity: 1;
               background: linear-gradient(90deg, rgba(249,115,21,0) 0%, rgba(249,115,21,1) 50%, rgba(249,115,21,0) 100%);
-            }
-            a.install-card:hover::after {
-              background: linear-gradient(180deg, rgba(249,115,21,0.55) 0%, rgba(255,255,255,0.08) 60%, rgba(255,255,255,0.02) 100%);
             }
             .install-card-num {
               position: relative;
@@ -690,18 +1034,17 @@ function App() {
               width: 44px;
               height: 44px;
               border-radius: 999px;
-              border: 1px solid rgba(249,115,21,0.55);
+              border: 1px solid rgba(249,115,21,0.45);
               background:
-                radial-gradient(circle at 30% 30%, rgba(249,115,21,0.28), rgba(249,115,21,0.06) 70%);
+                radial-gradient(circle at 30% 30%, rgba(249,115,21,0.18), rgba(249,115,21,0.04) 70%);
               box-shadow:
-                0 0 0 1px rgba(249,115,21,0.18),
-                0 6px 16px rgba(249,115,21,0.18),
-                0 0 24px rgba(249,115,21,0.20) inset;
+                0 0 0 1px rgba(249,115,21,0.12),
+                0 4px 12px rgba(249,115,21,0.14);
               font-family: "JetBrains Mono", monospace;
               font-size: 14px;
               font-weight: 600;
               letter-spacing: 0.5px;
-              color: #ffb070;
+              color: #c95808;
               margin-bottom: 26px;
               transition: transform 380ms ease, box-shadow 380ms ease, background 380ms ease, color 380ms ease;
             }
@@ -713,15 +1056,14 @@ function App() {
               border-color: rgba(249,115,21,0.9);
               box-shadow:
                 0 0 0 1px rgba(249,115,21,0.4),
-                0 10px 28px rgba(249,115,21,0.5),
-                0 0 30px rgba(249,115,21,0.25) inset;
+                0 10px 28px rgba(249,115,21,0.5);
             }
             .install-card-title {
               font-family: "Inter", system-ui, sans-serif;
               font-size: 26px;
               font-weight: 500;
               letter-spacing: -0.5px;
-              color: #fff;
+              color: #0a0a0a;
               line-height: 1.2;
               margin-bottom: 16px;
             }
@@ -729,7 +1071,7 @@ function App() {
               font-family: "Inter", system-ui, sans-serif;
               font-size: 16px;
               line-height: 1.55;
-              color: rgba(255,255,255,0.65);
+              color: rgba(0,0,0,0.62);
               margin-bottom: 28px;
               flex: 1;
             }
@@ -781,7 +1123,13 @@ function App() {
 
       {/* Search & reveal — tracking number → segmentation highlight.
           EN-only for now; the DE version of the page stays unchanged. */}
-      {window.TrackingLookup && lang === 'en' && <TrackingLookup accent={tweaks.accent} />}
+      {window.TrackingLookup && <TrackingLookup accent={tweaks.accent} />}
+
+      {/* Founder contact cards */}
+      <FounderCards accent={tweaks.accent} />
+
+      {/* Book a demo — Cal.com embed */}
+      <BookDemo />
 
       {/* FAQ */}
       <section
@@ -789,8 +1137,8 @@ function App() {
         className="faq-section"
         style={{
           padding: '112px 40px 96px',
-          background: '#0a0a0a',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
+          background: '#ffffff',
+          borderTop: '1px solid rgba(0,0,0,0.06)',
         }}
       >
         <div style={{ maxWidth: 1240, margin: '0 auto' }}>
@@ -815,7 +1163,7 @@ function App() {
               letterSpacing: -1.2,
               margin: 0,
               marginBottom: 64,
-              color: '#ffffff',
+              color: '#0a0a0a',
             }}
           >
             {t('faq.headline')}
@@ -826,7 +1174,7 @@ function App() {
                 key={i}
                 className="faq-item"
                 style={{
-                  borderTop: '1px solid rgba(255,255,255,0.12)',
+                  borderTop: '1px solid rgba(0,0,0,0.12)',
                   padding: '20px 0',
                 }}
               >
@@ -838,7 +1186,7 @@ function App() {
                     fontSize: 19,
                     fontWeight: 500,
                     letterSpacing: -0.3,
-                    color: '#ffffff',
+                    color: '#0a0a0a',
                     lineHeight: 1.35,
                     display: 'flex',
                     alignItems: 'flex-start',
@@ -870,7 +1218,7 @@ function App() {
                     fontFamily: '"Inter", system-ui, sans-serif',
                     fontSize: 16,
                     lineHeight: 1.55,
-                    color: 'rgba(255,255,255,0.72)',
+                    color: 'rgba(0,0,0,0.62)',
                     marginTop: 14,
                     maxWidth: 820,
                   }}
@@ -883,7 +1231,7 @@ function App() {
           <style>{`
             .faq-item summary::-webkit-details-marker { display: none; }
             .faq-marker {
-              color: rgba(255,255,255,0.55);
+              color: rgba(0,0,0,0.45);
               transition: transform 200ms ease, color 200ms ease;
             }
             .faq-item[open] .faq-marker {
@@ -896,12 +1244,6 @@ function App() {
           `}</style>
         </div>
       </section>
-
-      {/* Founder contact cards */}
-      <FounderCards accent={tweaks.accent} />
-
-      {/* Book a demo — Cal.com embed */}
-      <BookDemo />
 
       {/* Site footer — contact + legal links */}
       <Footer accent={tweaks.accent} />
