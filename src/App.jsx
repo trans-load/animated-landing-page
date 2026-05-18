@@ -109,11 +109,20 @@ function App() {
       // first 15% of the scroll is the intro (monitor scaling up) —
       // during that, the video stays paused at frame 0. After
       // progress 0.15, the remaining 85% maps to the full duration.
+      // Clamp the seek to the buffered range so slow connections
+      // pause at the last loaded frame instead of trying to jump
+      // past unloaded data (which freezes the element).
       const v = videoRef.current;
       if (v && v.duration && isFinite(v.duration)) {
         const INTRO_END = 0.15;
         const videoP = currentP < INTRO_END ? 0 : (currentP - INTRO_END) / (1 - INTRO_END);
-        const target = videoP * v.duration;
+        let target = videoP * v.duration;
+        const b = v.buffered;
+        const bufferedEnd = b && b.length > 0 ? b.end(b.length - 1) : 0;
+        if (bufferedEnd > 0 && target > bufferedEnd - 0.05) {
+          // Leave a 50ms safety margin behind the buffer head.
+          target = Math.max(0, bufferedEnd - 0.05);
+        }
         if (Math.abs(v.currentTime - target) > 1 / 48) {
           v.currentTime = target;
         }
@@ -158,6 +167,44 @@ function App() {
     };
     if (v.readyState >= 1) prime();
     else v.addEventListener('loadedmetadata', prime, { once: true });
+    // Explicitly call .load() to encourage browsers (Safari especially)
+    // to start fetching the full file immediately rather than waiting
+    // for the first interaction.
+    try { v.load(); } catch (e) {}
+  }, []);
+
+  // Track how much of the video the browser has actually downloaded.
+  // Scroll-bound playback fails silently if the user seeks past the
+  // buffered range — the <video> just freezes on the last loaded
+  // frame. We clamp the scroll-bound seek to the buffered range so
+  // slow networks see the animation pause cleanly instead of stalling
+  // mid-frame, and we surface a tiny BUFFERING % overlay during the
+  // intro so cofounders on slow connections know something's loading.
+  const [bufferedRatio, setBufferedRatio] = useStateApp(0);
+  const bufferedRatioRef = useRefApp(0);
+  useEffectApp(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    const update = () => {
+      if (!v.duration || !isFinite(v.duration)) return;
+      const b = v.buffered;
+      const end = b.length > 0 ? b.end(b.length - 1) : 0;
+      const r = Math.min(1, end / v.duration);
+      bufferedRatioRef.current = r;
+      // Throttle React state updates — only push when crossing a 5%
+      // bucket so the overlay updates ~20 times max during load.
+      const rounded = Math.round(r * 20) / 20;
+      setBufferedRatio((prev) => (rounded !== prev ? rounded : prev));
+    };
+    v.addEventListener('progress', update);
+    v.addEventListener('loadedmetadata', update);
+    v.addEventListener('canplaythrough', update);
+    update();
+    return () => {
+      v.removeEventListener('progress', update);
+      v.removeEventListener('loadedmetadata', update);
+      v.removeEventListener('canplaythrough', update);
+    };
   }, []);
 
   const bgColor =
@@ -273,6 +320,41 @@ function App() {
                 pointerEvents: 'none',
               }}
             />
+            {/* BUFFERING indicator — bottom-right of the monitor.
+                Visible only while the video is still downloading AND
+                we're inside the intro phase. Once fully buffered the
+                whole row vanishes. Helps debug "only part of the
+                animation loaded" reports on slow connections. */}
+            {bufferedRatio < 0.99 && (
+              <div
+                className="cctv-buffer"
+                style={{
+                  position: 'absolute',
+                  bottom: 36,
+                  right: 40,
+                  padding: '14px 22px',
+                  borderRadius: 8,
+                  background: 'rgba(0,0,0,0.6)',
+                  backdropFilter: 'blur(8px)',
+                  WebkitBackdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255,255,255,0.14)',
+                  fontFamily: '"JetBrains Mono", monospace',
+                  fontSize: 22,
+                  fontWeight: 700,
+                  letterSpacing: 2.6,
+                  color: '#ffffff',
+                  textTransform: 'uppercase',
+                  pointerEvents: 'none',
+                  opacity: monitorOpacity,
+                  transition: 'opacity 160ms linear',
+                  zIndex: 6,
+                  fontVariantNumeric: 'tabular-nums',
+                }}
+              >
+                BUF {Math.round(bufferedRatio * 100)}%
+              </div>
+            )}
+
             {/* CCTV overlay set — visible during the intro phase, fades
                 out once the monitor reaches full size:
                   • REC badge   (top-left)
