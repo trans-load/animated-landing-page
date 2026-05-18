@@ -173,39 +173,9 @@ function App() {
     try { v.load(); } catch (e) {}
   }, []);
 
-  // Track how much of the video the browser has actually downloaded.
-  // Scroll-bound playback fails silently if the user seeks past the
-  // buffered range — the <video> just freezes on the last loaded
-  // frame. We clamp the scroll-bound seek to the buffered range so
-  // slow networks see the animation pause cleanly instead of stalling
-  // mid-frame, and we surface a tiny BUFFERING % overlay during the
-  // intro so cofounders on slow connections know something's loading.
-  const [bufferedRatio, setBufferedRatio] = useStateApp(0);
-  const bufferedRatioRef = useRefApp(0);
-  useEffectApp(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    const update = () => {
-      if (!v.duration || !isFinite(v.duration)) return;
-      const b = v.buffered;
-      const end = b.length > 0 ? b.end(b.length - 1) : 0;
-      const r = Math.min(1, end / v.duration);
-      bufferedRatioRef.current = r;
-      // Throttle React state updates — only push when crossing a 5%
-      // bucket so the overlay updates ~20 times max during load.
-      const rounded = Math.round(r * 20) / 20;
-      setBufferedRatio((prev) => (rounded !== prev ? rounded : prev));
-    };
-    v.addEventListener('progress', update);
-    v.addEventListener('loadedmetadata', update);
-    v.addEventListener('canplaythrough', update);
-    update();
-    return () => {
-      v.removeEventListener('progress', update);
-      v.removeEventListener('loadedmetadata', update);
-      v.removeEventListener('canplaythrough', update);
-    };
-  }, []);
+  // (Buffered-progress tracking was removed; the seek clamp in the
+  // rAF loop below reads v.buffered directly each frame, so we don't
+  // need a separate listener + React state for it.)
 
   const bgColor =
     tweaks.bg === 'light' ? '#e9e7e2' : tweaks.bg === 'mid' ? '#1a1a1d' : '#ffffff';
@@ -320,41 +290,6 @@ function App() {
                 pointerEvents: 'none',
               }}
             />
-            {/* BUFFERING indicator — bottom-right of the monitor.
-                Visible only while the video is still downloading AND
-                we're inside the intro phase. Once fully buffered the
-                whole row vanishes. Helps debug "only part of the
-                animation loaded" reports on slow connections. */}
-            {bufferedRatio < 0.99 && (
-              <div
-                className="cctv-buffer"
-                style={{
-                  position: 'absolute',
-                  bottom: 36,
-                  right: 40,
-                  padding: '14px 22px',
-                  borderRadius: 8,
-                  background: 'rgba(0,0,0,0.6)',
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(255,255,255,0.14)',
-                  fontFamily: '"JetBrains Mono", monospace',
-                  fontSize: 22,
-                  fontWeight: 700,
-                  letterSpacing: 2.6,
-                  color: '#ffffff',
-                  textTransform: 'uppercase',
-                  pointerEvents: 'none',
-                  opacity: monitorOpacity,
-                  transition: 'opacity 160ms linear',
-                  zIndex: 6,
-                  fontVariantNumeric: 'tabular-nums',
-                }}
-              >
-                BUF {Math.round(bufferedRatio * 100)}%
-              </div>
-            )}
-
             {/* CCTV overlay set — visible during the intro phase, fades
                 out once the monitor reaches full size:
                   • REC badge   (top-left)
