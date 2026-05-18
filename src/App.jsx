@@ -629,7 +629,7 @@ function App() {
                     // on narrow phones. em-based letter-spacing scales
                     // with the font size so per-char tightness reads the
                     // same on mobile and desktop.
-                    fontSize: 'clamp(34px, 8vw, 108px)',
+                    fontSize: 'clamp(34px, 6vw, 80px)',
                     lineHeight: 0.98,
                     letterSpacing: '-0.032em',
                     color: '#fff',
