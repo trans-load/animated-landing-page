@@ -193,6 +193,11 @@ function App() {
         style={{
           position: 'relative',
           height: '220vh', // 120vh of scroll range = video advances ~5x slower per pixel
+          // Match the sticky child's bg so sub-pixel rounding between the
+          // section bottom and the next sibling (register-tab wrapper,
+          // which is white) can't expose the page bg as a white sliver
+          // on mobile.
+          background: '#000',
         }}
       >
         <div
