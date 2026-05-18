@@ -192,12 +192,17 @@ function App() {
         ref={heroRef}
         style={{
           position: 'relative',
+          // Stack above the register-tab wrapper so the 1px marginBottom
+          // overlap below paints section-black on top of wrapper-white.
+          zIndex: 1,
           height: '220vh', // 120vh of scroll range = video advances ~5x slower per pixel
-          // Match the sticky child's bg so sub-pixel rounding between the
-          // section bottom and the next sibling (register-tab wrapper,
-          // which is white) can't expose the page bg as a white sliver
-          // on mobile.
           background: '#000',
+          // Overlap the next sibling (register-tab wrapper, white bg) by
+          // 1px. Combined with z-index above, this guarantees the section's
+          // black mask covers any sub-pixel rendering gap or white sliver
+          // at the wrapper's top edge — mobile Safari was exposing the
+          // wrapper white between the section bottom and the SVG fill.
+          marginBottom: -1,
         }}
       >
         <div
