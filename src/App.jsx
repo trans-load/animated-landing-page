@@ -177,6 +177,35 @@ function App() {
   // rAF loop below reads v.buffered directly each frame, so we don't
   // need a separate listener + React state for it.)
 
+  // Buffer warm-up: during the boot overlay, play the hero video at
+  // 16x speed (muted, hidden behind the overlay). This coerces Chrome
+  // out of its preload="auto" heuristic — which caps at ~30% of the
+  // file for non-playing videos — and forces it to fetch the whole
+  // clip to keep up with playback. Once the overlay starts fading,
+  // pause and rewind so the scroll-bound scrub takes over cleanly.
+  useEffectApp(() => {
+    if (!booting || bootFading) return;
+    const v = videoRef.current;
+    if (!v) return;
+    const startWarmup = () => {
+      try {
+        v.muted = true;
+        v.playbackRate = 16;
+        const p = v.play();
+        if (p && typeof p.then === 'function') p.catch(() => {});
+      } catch (e) {}
+    };
+    if (v.readyState >= 1) startWarmup();
+    else v.addEventListener('loadedmetadata', startWarmup, { once: true });
+    return () => {
+      try {
+        v.pause();
+        v.currentTime = 0;
+        v.playbackRate = 1;
+      } catch (e) {}
+    };
+  }, [booting, bootFading]);
+
 
   // Boot sequence: lock scroll for 8s, then fade and unlock. The bar
   // visual is driven by CSS keyframes (see .boot-bar-fill in
