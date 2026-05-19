@@ -187,12 +187,18 @@ function App() {
   // rAF loop below reads v.buffered directly each frame, so we don't
   // need a separate listener + React state for it.)
 
-  // Download the hero as a blob via streamed fetch so we can show
-  // truthful byte-level progress and feed the <video> a blob URL
-  // (which can't be evicted by Chrome). Falls back to the direct
-  // URL if fetch hits an error or the 25s ceiling.
+  // The hero download is started inline in <head> of index.html, so
+  // by the time React mounts (3-4s later, after Babel transpiles all
+  // the JSX) the fetch is already well underway — often complete.
+  // This effect just polls window.__hero for progress + completion
+  // and feeds the result through to the boot loader + <video>.
   useEffectApp(() => {
-    if (typeof window === 'undefined' || typeof fetch !== 'function') {
+    if (typeof window === 'undefined') return;
+    const hero = window.__hero;
+    if (!hero) {
+      // Inline script didn't run (very old browser, blocked) — fall
+      // back to the direct URL and let the <video> element preload
+      // however much it can.
       setHeroVideoSrc(HERO_URL);
       downloadProgressRef.current = 1;
       blobReadyRef.current = true;
@@ -200,46 +206,26 @@ function App() {
     }
     let aborted = false;
     let blobUrl = null;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 25000);
-    (async () => {
-      try {
-        const res = await fetch(HERO_URL, { signal: controller.signal });
-        if (!res.ok || !res.body) throw new Error('hero fetch failed');
-        const total = parseInt(res.headers.get('content-length') || '0', 10);
-        const reader = res.body.getReader();
-        const chunks = [];
-        let received = 0;
-        while (!aborted) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          chunks.push(value);
-          received += value.byteLength;
-          if (total > 0) {
-            downloadProgressRef.current = Math.min(1, received / total);
-          }
-        }
-        if (!aborted) {
-          const blob = new Blob(chunks, { type: 'video/mp4' });
-          blobUrl = URL.createObjectURL(blob);
+    let pollId = 0;
+    const poll = () => {
+      if (aborted) return;
+      downloadProgressRef.current = hero.progress;
+      if (hero.done) {
+        if (hero.blob) {
+          blobUrl = URL.createObjectURL(hero.blob);
           setHeroVideoSrc(blobUrl);
-          downloadProgressRef.current = 1;
-          blobReadyRef.current = true;
-        }
-      } catch (e) {
-        if (!aborted) {
+        } else {
           setHeroVideoSrc(HERO_URL);
-          downloadProgressRef.current = 1;
-          blobReadyRef.current = true;
         }
-      } finally {
-        clearTimeout(timeoutId);
+        blobReadyRef.current = true;
+        return;
       }
-    })();
+      pollId = setTimeout(poll, 80);
+    };
+    poll();
     return () => {
       aborted = true;
-      controller.abort();
-      clearTimeout(timeoutId);
+      if (pollId) clearTimeout(pollId);
       if (blobUrl) URL.revokeObjectURL(blobUrl);
     };
   }, []);
