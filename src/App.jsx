@@ -33,8 +33,8 @@ function App() {
   // forcing a full reload + losing the priming + scrub position.
   const [heroVideoSrc] = useStateApp(() =>
     (typeof window !== 'undefined' && window.innerWidth <= 720)
-      ? 'assets/hero-mobile.mp4'
-      : 'assets/hero.mp4'
+      ? 'assets/hero-mobile.mp4?v=2'
+      : 'assets/hero.mp4?v=2'
   );
   const heroRef = useRefApp(null);
   const videoRef = useRefApp(null);
@@ -327,6 +327,10 @@ function App() {
                     height: '100%',
                     background: '#f97315',
                     boxShadow: '0 0 10px rgba(249,115,21,0.7)',
+                    // Smooth between discrete network-chunk progress
+                    // updates so the bar reads as a continuous fill
+                    // rather than jumping in steps.
+                    transition: 'width 320ms cubic-bezier(0.22, 1, 0.36, 1)',
                   }}
                 />
               </div>
