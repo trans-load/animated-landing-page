@@ -299,9 +299,11 @@ function App() {
       const elapsed = performance.now() - start;
       const timeP = Math.min(1, elapsed / MIN_MS);
       const dlP = downloadProgressRef.current;
-      // Bar visualises whichever is FURTHER ALONG — keeps the bar
-      // moving forward smoothly even if one signal stalls.
-      setBootProgress(Math.max(timeP, dlP));
+      // Bar tracks the SLOWER of the two constraints so it reflects
+      // the actual unlock condition: when bar hits 100%, both the
+      // 5s minimum has elapsed and the blob has downloaded, so we
+      // unlock immediately rather than dwelling at full.
+      setBootProgress(Math.min(timeP, dlP));
 
       const minDone = elapsed >= MIN_MS;
       const blobReady = blobReadyRef.current;
