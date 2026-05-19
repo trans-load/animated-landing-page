@@ -17,11 +17,12 @@ function App() {
   const [scrolled, setScrolled] = useStateApp(false);
   const [heroInView, setHeroInView] = useStateApp(true); // hero section still touching viewport
   // CCTV-style boot overlay: blocks scroll for 8s on first load while
-  // the system "comes online", then fades out. The bar is a pure CSS
-  // animation — no React state — so it always paints smoothly on any
-  // device. JS only handles the timer that flips the overlay off.
+  // the system "comes online", then fades out. The bar visual is a
+  // pure CSS animation; bootProgress is tracked in JS state purely
+  // for the cycling boot line + percentage label.
   const [booting, setBooting] = useStateApp(true);
   const [bootFading, setBootFading] = useStateApp(false);
+  const [bootProgress, setBootProgress] = useStateApp(0);
   // Live clock for the CCTV timestamp overlay during the intro phase.
   const [now, setNow] = useStateApp(() => new Date());
   useEffectApp(() => {
@@ -177,9 +178,10 @@ function App() {
   // need a separate listener + React state for it.)
 
 
-  // Boot sequence: lock scroll for 8s, then fade and unlock. Bar
-  // animation lives in CSS keyframes (see .boot-bar in index.html);
-  // this effect is just two timers.
+  // Boot sequence: lock scroll for 8s, then fade and unlock. The bar
+  // visual is driven by CSS keyframes (see .boot-bar-fill in
+  // index.html); this rAF only updates bootProgress for the cycling
+  // text + percentage label.
   useEffectApp(() => {
     if (typeof window === 'undefined') return;
     const prevHtmlOverflow = document.documentElement.style.overflow;
@@ -187,6 +189,18 @@ function App() {
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
     window.scrollTo(0, 0);
+
+    const start = performance.now();
+    const DURATION_MS = 8000;
+    let rafId = 0;
+    const tick = () => {
+      const elapsed = performance.now() - start;
+      const p = Math.min(1, elapsed / DURATION_MS);
+      setBootProgress(p);
+      if (p < 1) rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+
     const fadeAt = setTimeout(() => setBootFading(true), 8000);
     const unlockAt = setTimeout(() => {
       setBooting(false);
@@ -194,6 +208,7 @@ function App() {
       document.body.style.overflow = prevBodyOverflow;
     }, 8500);
     return () => {
+      cancelAnimationFrame(rafId);
       clearTimeout(fadeAt);
       clearTimeout(unlockAt);
       document.documentElement.style.overflow = prevHtmlOverflow;
@@ -203,6 +218,15 @@ function App() {
 
   const bgColor =
     tweaks.bg === 'light' ? '#e9e7e2' : tweaks.bg === 'mid' ? '#1a1a1d' : '#ffffff';
+
+  const BOOT_LINES = [
+    'INITIALIZING CAMERA FEED',
+    'CONNECTING TO DOCK-A',
+    'CALIBRATING LENS GEOMETRY',
+    'LOADING WAREHOUSE MODEL',
+    'SYSTEM READY',
+  ];
+  const bootLineIdx = Math.min(BOOT_LINES.length - 1, Math.floor(bootProgress * BOOT_LINES.length));
 
   return (
     <div style={{ background: bgColor, color: '#0a0a0a', minHeight: '100vh' }}>
@@ -228,7 +252,7 @@ function App() {
             touchAction: 'none',
           }}
         >
-          {/* Center stack: brand logo + linear progress bar */}
+          {/* Center stack: logo + cycling boot line + linear bar + % */}
           <div style={{ textAlign: 'center', maxWidth: 480, padding: '0 24px' }}>
             <img
               src="assets/logo-default.png?v=2"
@@ -237,22 +261,49 @@ function App() {
                 height: 44,
                 width: 'auto',
                 display: 'block',
-                margin: '0 auto 32px',
+                margin: '0 auto 28px',
               }}
             />
             <div
               style={{
-                width: 280,
-                height: 2,
-                margin: '0 auto',
-                background: 'rgba(255,255,255,0.15)',
-                borderRadius: 2,
-                overflow: 'hidden',
+                fontFamily: '"JetBrains Mono", monospace',
+                fontSize: 13,
+                letterSpacing: 2,
+                color: 'rgba(255,255,255,0.85)',
+                minHeight: 20,
+                marginBottom: 24,
               }}
             >
-              {/* Bar fill is a pure CSS keyframe animation — see
-                  .boot-bar-fill in index.html. No JS state. */}
-              <div className="boot-bar-fill" />
+              {BOOT_LINES[bootLineIdx]}
+              <span style={{ animation: 'cctvPulse 0.9s ease-in-out infinite' }}>_</span>
+            </div>
+            <div style={{ width: 280, margin: '0 auto' }}>
+              <div
+                style={{
+                  height: 2,
+                  background: 'rgba(255,255,255,0.15)',
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                }}
+              >
+                {/* Pure CSS keyframe scaleX 0→1 over 8s — see
+                    .boot-bar-fill in index.html. */}
+                <div className="boot-bar-fill" />
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  marginTop: 8,
+                  fontFamily: '"JetBrains Mono", monospace',
+                  fontSize: 10,
+                  letterSpacing: 1.8,
+                  color: 'rgba(255,255,255,0.5)',
+                }}
+              >
+                <span>{Math.round(bootProgress * 100)}%</span>
+                <span>BOOTING</span>
+              </div>
             </div>
           </div>
 
