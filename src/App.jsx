@@ -23,19 +23,13 @@ function App() {
   // its own rendering of the overlay (gone) and to set a "ready"
   // flag the inline script polls. The flag isn't needed since the
   // inline script just checks if #root has children.
-  // Live clock for the CCTV timestamp overlay during the intro phase.
-  const [now, setNow] = useStateApp(() => new Date());
-  useEffectApp(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(id);
-  }, []);
   // We fetch the hero video ourselves and feed the <video> a blob URL.
   // This is the ONLY way to defeat Chrome's preload heuristic, which
   // caps non-playing video fetch around 30% (and the 16x-playback
   // workaround gets undone by buffer eviction). Boot waits for the
   // blob to be ready before unlocking — variable duration, but the
   // bar shows truthful download progress so the wait is honest.
-  const HERO_URL = 'assets/hero.mp4?v=5';
+  const HERO_URL = 'assets/hero.mp4?v=6';
   const [heroVideoSrc, setHeroVideoSrc] = useStateApp(null);
   const heroRef = useRefApp(null);
   const videoRef = useRefApp(null);
@@ -345,122 +339,6 @@ function App() {
                 pointerEvents: 'none',
               }}
             />
-            {/* CCTV overlay set — visible during the intro phase, fades
-                out once the monitor reaches full size:
-                  • REC badge   (top-left)
-                  • Timestamp   (top-right, ticking live)
-                  • CAM label   (bottom-left)
-                  • Scanlines   (subtle horizontal interlace pattern) */}
-            <div
-              className="cctv-rec"
-              style={{
-                position: 'absolute',
-                top: 36,
-                left: 40,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 18,
-                padding: '18px 30px 18px 26px',
-                borderRadius: 8,
-                background: 'rgba(0,0,0,0.6)',
-                backdropFilter: 'blur(8px)',
-                WebkitBackdropFilter: 'blur(8px)',
-                border: '1px solid rgba(255,255,255,0.14)',
-                fontFamily: '"JetBrains Mono", monospace',
-                fontSize: 34,
-                fontWeight: 700,
-                letterSpacing: 3.2,
-                color: '#ffffff',
-                textTransform: 'uppercase',
-                pointerEvents: 'none',
-                opacity: monitorOpacity,
-                transition: 'opacity 160ms linear',
-                zIndex: 6,
-              }}
-            >
-              <span
-                style={{
-                  width: 22,
-                  height: 22,
-                  borderRadius: '50%',
-                  background: '#ff3b30',
-                  boxShadow: '0 0 18px rgba(255,59,48,0.95)',
-                  animation: 'cctvPulse 1.4s ease-in-out infinite',
-                }}
-              />
-              REC
-            </div>
-
-            {/* Live timestamp — top-right */}
-            <div
-              className="cctv-timestamp"
-              style={{
-                position: 'absolute',
-                top: 36,
-                right: 40,
-                padding: '18px 26px',
-                borderRadius: 8,
-                background: 'rgba(0,0,0,0.6)',
-                backdropFilter: 'blur(8px)',
-                WebkitBackdropFilter: 'blur(8px)',
-                border: '1px solid rgba(255,255,255,0.14)',
-                fontFamily: '"JetBrains Mono", monospace',
-                fontSize: 34,
-                fontWeight: 700,
-                letterSpacing: 3.2,
-                color: '#ffffff',
-                textTransform: 'uppercase',
-                pointerEvents: 'none',
-                opacity: monitorOpacity,
-                transition: 'opacity 160ms linear',
-                zIndex: 6,
-                fontVariantNumeric: 'tabular-nums',
-              }}
-            >
-              {(() => {
-                const pad = (n) => String(n).padStart(2, '0');
-                const Y = now.getFullYear();
-                const M = pad(now.getMonth() + 1);
-                const D = pad(now.getDate());
-                const h = pad(now.getHours());
-                const m = pad(now.getMinutes());
-                const s = pad(now.getSeconds());
-                return (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1.15, gap: 4 }}>
-                    <span>{`${Y}-${M}-${D}`}</span>
-                    <span>{`${h}:${m}:${s}`}</span>
-                  </div>
-                );
-              })()}
-            </div>
-
-            {/* CAM identifier — bottom-left */}
-            <div
-              className="cctv-cam"
-              style={{
-                position: 'absolute',
-                bottom: 36,
-                left: 40,
-                padding: '18px 26px',
-                borderRadius: 8,
-                background: 'rgba(0,0,0,0.6)',
-                backdropFilter: 'blur(8px)',
-                WebkitBackdropFilter: 'blur(8px)',
-                border: '1px solid rgba(255,255,255,0.14)',
-                fontFamily: '"JetBrains Mono", monospace',
-                fontSize: 34,
-                fontWeight: 700,
-                letterSpacing: 3.2,
-                color: '#ffffff',
-                textTransform: 'uppercase',
-                pointerEvents: 'none',
-                opacity: monitorOpacity,
-                transition: 'opacity 160ms linear',
-                zIndex: 6,
-              }}
-            >
-              CAM-01 · DOCK-A
-            </div>
 
             {/* CRT scanlines — subtle horizontal interlace pattern that
                 fades out with the rest of the CCTV chrome. */}
