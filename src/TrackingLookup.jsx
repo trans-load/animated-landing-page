@@ -714,6 +714,43 @@ function TrackingLookup({ accent = '#f97315' }) {
                     />
                   ));
                 })}
+                {/* "Dock door N" labels above each detected dock door.
+                    Drawn in image-space inside the SVG so they track the
+                    photo across any resize. */}
+                {docks.map((dk, gi) => {
+                  const [x, y, w] = dk.bbox;
+                  const cx = x + w / 2;
+                  const pillW = 150;
+                  const pillH = 32;
+                  const gap = 14;
+                  const pillTop = Math.max(8, y - gap - pillH);
+                  return (
+                    <g key={`dock-label-${dk.id}`} style={{ pointerEvents: 'none' }}>
+                      <rect
+                        x={cx - pillW / 2}
+                        y={pillTop}
+                        width={pillW}
+                        height={pillH}
+                        rx={pillH / 2}
+                        fill="rgba(10, 10, 12, 0.78)"
+                        stroke={`${GATE_COLORS[gi]}55`}
+                        strokeWidth={1.2}
+                      />
+                      <text
+                        x={cx}
+                        y={pillTop + pillH / 2 + 5}
+                        textAnchor="middle"
+                        fontFamily='"JetBrains Mono", monospace'
+                        fontSize={13}
+                        fontWeight={600}
+                        letterSpacing={1.4}
+                        fill="#ffffff"
+                      >
+                        DOCK DOOR {gi + 1}
+                      </text>
+                    </g>
+                  );
+                })}
                 {/* Pulsing ring around the selected segment's centroid */}
                 {selected && selectedCentroid && (
                   <g style={{ pointerEvents: 'none' }}>
