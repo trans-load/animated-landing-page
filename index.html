@@ -4,6 +4,42 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#000000" />
+<!-- Pre-fetch the hero video immediately at HTML parse time so the
+     download runs in parallel with the Babel-in-browser transpile
+     (which adds 3-4s before App.jsx can even start). React picks up
+     the in-flight stream via window.__hero when it mounts. Cuts the
+     visible loading wait by roughly the duration of the transpile. -->
+<script>
+(function () {
+  if (typeof fetch !== 'function') return;
+  var hero = (window.__hero = { progress: 0, blob: null, done: false, error: false });
+  fetch('assets/hero.mp4?v=5').then(function (res) {
+    if (!res.ok || !res.body) throw new Error('hero fetch failed');
+    var total = parseInt(res.headers.get('content-length') || '0', 10);
+    var reader = res.body.getReader();
+    var chunks = [];
+    var received = 0;
+    function pump() {
+      return reader.read().then(function (r) {
+        if (r.done) {
+          hero.blob = new Blob(chunks, { type: 'video/mp4' });
+          hero.progress = 1;
+          hero.done = true;
+          return;
+        }
+        chunks.push(r.value);
+        received += r.value.byteLength;
+        if (total > 0) hero.progress = Math.min(1, received / total);
+        return pump();
+      });
+    }
+    return pump();
+  }).catch(function () {
+    hero.error = true;
+    hero.done = true;
+  });
+})();
+</script>
 <link rel="icon" type="image/png" href="assets/favicon.png" />
 <link rel="apple-touch-icon" href="assets/favicon.png" />
 <title>transload — Computer vision for the loading dock</title>
