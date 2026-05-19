@@ -57,8 +57,8 @@ function News({ accent = '#f97315' }) {
       className="news-section"
       style={{
         padding: '112px 40px 96px',
-        background: '#0a0a0a',
-        borderTop: '1px solid rgba(255,255,255,0.06)',
+        background: '#ffffff',
+        borderTop: '1px solid rgba(0,0,0,0.06)',
       }}
     >
       <div style={{ maxWidth: 1240, margin: '0 auto' }}>
@@ -70,7 +70,7 @@ function News({ accent = '#f97315' }) {
             lineHeight: 1.08,
             letterSpacing: -1.2,
             margin: '0 0 64px',
-            color: '#ffffff',
+            color: '#0a0a0a',
           }}
         >
           From{' '}
@@ -105,7 +105,6 @@ function News({ accent = '#f97315' }) {
                 position: 'relative',
                 borderRadius: 12,
                 overflow: 'hidden',
-                border: '1px solid rgba(255,255,255,0.10)',
                 background: '#ffffff',
                 minHeight: 560,
                 display: 'flex',
@@ -142,6 +141,7 @@ function News({ accent = '#f97315' }) {
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: 12,
+                    background: '#ffffff',
                     color: 'rgba(0,0,0,0.55)',
                     textDecoration: 'none',
                     fontFamily: '"Inter", system-ui, sans-serif',

@@ -44,8 +44,8 @@ function Testimonial({ accent = '#f97315' }) {
       className="testimonial-section"
       style={{
         padding: '112px 40px 96px',
-        background: '#0a0a0a',
-        borderTop: '1px solid rgba(255,255,255,0.06)',
+        background: '#ffffff',
+        borderTop: '1px solid rgba(0,0,0,0.06)',
       }}
     >
       <div style={{ maxWidth: 1240, margin: '0 auto' }}>
@@ -57,7 +57,7 @@ function Testimonial({ accent = '#f97315' }) {
             lineHeight: 1.08,
             letterSpacing: -1.2,
             margin: '0 0 64px',
-            color: '#ffffff',
+            color: '#0a0a0a',
           }}
         >
           What our{' '}
@@ -84,8 +84,8 @@ function Testimonial({ accent = '#f97315' }) {
             gap: 18,
             padding: '14px 18px',
             marginBottom: 18,
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.10)',
+            background: 'rgba(0,0,0,0.03)',
+            border: '1px solid rgba(0,0,0,0.10)',
             borderRadius: 12,
           }}
         >
@@ -95,7 +95,7 @@ function Testimonial({ accent = '#f97315' }) {
                 fontFamily: '"Inter", system-ui, sans-serif',
                 fontSize: 17,
                 fontWeight: 600,
-                color: '#ffffff',
+                color: '#0a0a0a',
                 letterSpacing: -0.2,
                 lineHeight: 1.25,
               }}
@@ -106,7 +106,7 @@ function Testimonial({ accent = '#f97315' }) {
               style={{
                 fontFamily: '"Inter", system-ui, sans-serif',
                 fontSize: 14,
-                color: 'rgba(255,255,255,0.65)',
+                color: 'rgba(0,0,0,0.6)',
                 marginTop: 4,
                 lineHeight: 1.4,
               }}
@@ -147,9 +147,9 @@ function Testimonial({ accent = '#f97315' }) {
             aspectRatio: '16 / 9',
             borderRadius: 16,
             overflow: 'hidden',
-            border: '1px solid rgba(255,255,255,0.10)',
+            border: '1px solid rgba(0,0,0,0.10)',
             background: '#000',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.20)',
           }}
         >
           {shouldMount ? (
