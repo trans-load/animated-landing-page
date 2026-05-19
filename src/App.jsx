@@ -183,7 +183,7 @@ function App() {
   // need a separate listener + React state for it.)
 
   // Boot sequence: lock scroll, scroll to top, animate progress 0→1 over
-  // 6s, then fade out (500ms) and unlock. Pin html+body so mobile Safari
+  // 7s, then fade out (500ms) and unlock. Pin html+body so mobile Safari
   // can't pull-scroll through the overlay.
   useEffectApp(() => {
     if (typeof window === 'undefined') return;
@@ -194,7 +194,7 @@ function App() {
     window.scrollTo(0, 0);
 
     const start = performance.now();
-    const DURATION_MS = 6000;
+    const DURATION_MS = 7000;
     let rafId = 0;
     let fadeTimer = 0;
     const tick = () => {
