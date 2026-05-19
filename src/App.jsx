@@ -16,10 +16,11 @@ function App() {
   const [progress, setProgress] = useStateApp(0); // 0..1 over the transition window
   const [scrolled, setScrolled] = useStateApp(false);
   const [heroInView, setHeroInView] = useStateApp(true); // hero section still touching viewport
-  // CCTV-style boot overlay: blocks scroll for 5s on first load while
-  // the system "comes online", then fades out.
+  // CCTV-style boot overlay: blocks scroll for 8s on first load while
+  // the system "comes online", then fades out. The bar is a pure CSS
+  // animation — no React state — so it always paints smoothly on any
+  // device. JS only handles the timer that flips the overlay off.
   const [booting, setBooting] = useStateApp(true);
-  const [bootProgress, setBootProgress] = useStateApp(0);
   const [bootFading, setBootFading] = useStateApp(false);
   // Live clock for the CCTV timestamp overlay during the intro phase.
   const [now, setNow] = useStateApp(() => new Date());
@@ -27,10 +28,8 @@ function App() {
     const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
   }, []);
-  // Single hero video source — same 1080p file on desktop and mobile
-  // so phones get the same visual quality. The previous mobile-specific
-  // 480p variant got upscaled by the device GPU and looked blurry.
-  const heroVideoSrc = 'assets/hero.mp4?v=3';
+  // Single hero video source — same 1080p file on desktop and mobile.
+  const heroVideoSrc = 'assets/hero.mp4?v=4';
   const heroRef = useRefApp(null);
   const videoRef = useRefApp(null);
   // Ref on the hero text container so the scroll rAF can mutate the
@@ -178,12 +177,9 @@ function App() {
   // need a separate listener + React state for it.)
 
 
-  // Boot sequence: lock scroll, scroll to top, animate a smooth progress
-  // bar over 8s, then fade out (500ms) and unlock. Plain timer, no
-  // buffer checks — the video preloads in parallel via preload="auto"
-  // on the <video> element, and the existing seek clamp in the scroll
-  // rAF handles any unbuffered range gracefully. 8s buys enough budget
-  // for a 19 MB 1080p file on a ~20 Mbps connection.
+  // Boot sequence: lock scroll for 8s, then fade and unlock. Bar
+  // animation lives in CSS keyframes (see .boot-bar in index.html);
+  // this effect is just two timers.
   useEffectApp(() => {
     if (typeof window === 'undefined') return;
     const prevHtmlOverflow = document.documentElement.style.overflow;
@@ -191,30 +187,15 @@ function App() {
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
     window.scrollTo(0, 0);
-
-    const start = performance.now();
-    const DURATION_MS = 8000;
-    let rafId = 0;
-    let fadeTimer = 0;
-    const tick = () => {
-      const elapsed = performance.now() - start;
-      const p = Math.min(1, elapsed / DURATION_MS);
-      setBootProgress(p);
-      if (p < 1) {
-        rafId = requestAnimationFrame(tick);
-      } else {
-        setBootFading(true);
-        fadeTimer = setTimeout(() => {
-          setBooting(false);
-          document.documentElement.style.overflow = prevHtmlOverflow;
-          document.body.style.overflow = prevBodyOverflow;
-        }, 500);
-      }
-    };
-    rafId = requestAnimationFrame(tick);
+    const fadeAt = setTimeout(() => setBootFading(true), 8000);
+    const unlockAt = setTimeout(() => {
+      setBooting(false);
+      document.documentElement.style.overflow = prevHtmlOverflow;
+      document.body.style.overflow = prevBodyOverflow;
+    }, 8500);
     return () => {
-      cancelAnimationFrame(rafId);
-      clearTimeout(fadeTimer);
+      clearTimeout(fadeAt);
+      clearTimeout(unlockAt);
       document.documentElement.style.overflow = prevHtmlOverflow;
       document.body.style.overflow = prevBodyOverflow;
     };
@@ -222,18 +203,6 @@ function App() {
 
   const bgColor =
     tweaks.bg === 'light' ? '#e9e7e2' : tweaks.bg === 'mid' ? '#1a1a1d' : '#ffffff';
-
-  // CCTV-style boot lines — derived from progress so they reveal one at
-  // a time over the 5s window. Kept in English (terminal-style chrome)
-  // regardless of UI language; reads as the camera system coming online.
-  const BOOT_LINES = [
-    'INITIALIZING CAMERA FEED',
-    'CONNECTING TO DOCK-A',
-    'CALIBRATING LENS GEOMETRY',
-    'LOADING WAREHOUSE MODEL',
-    'SYSTEM READY',
-  ];
-  const bootLineIdx = Math.min(BOOT_LINES.length - 1, Math.floor(bootProgress * BOOT_LINES.length));
 
   return (
     <div style={{ background: bgColor, color: '#0a0a0a', minHeight: '100vh' }}>
@@ -259,7 +228,7 @@ function App() {
             touchAction: 'none',
           }}
         >
-          {/* Center stack: brand + boot line + progress bar */}
+          {/* Center stack: brand logo + linear progress bar */}
           <div style={{ textAlign: 'center', maxWidth: 480, padding: '0 24px' }}>
             <img
               src="assets/logo-default.png?v=2"
@@ -268,58 +237,22 @@ function App() {
                 height: 44,
                 width: 'auto',
                 display: 'block',
-                margin: '0 auto 28px',
+                margin: '0 auto 32px',
               }}
             />
             <div
               style={{
-                fontFamily: '"JetBrains Mono", monospace',
-                fontSize: 13,
-                letterSpacing: 2,
-                color: 'rgba(255,255,255,0.85)',
-                minHeight: 20,
-                marginBottom: 24,
+                width: 280,
+                height: 2,
+                margin: '0 auto',
+                background: 'rgba(255,255,255,0.15)',
+                borderRadius: 2,
+                overflow: 'hidden',
               }}
             >
-              {BOOT_LINES[bootLineIdx]}
-              <span style={{ opacity: bootProgress < 1 ? 1 : 0, animation: 'cctvPulse 0.9s ease-in-out infinite' }}>_</span>
-            </div>
-            <div style={{ width: 280, margin: '0 auto' }}>
-              <div
-                style={{
-                  height: 2,
-                  background: 'rgba(255,255,255,0.15)',
-                  borderRadius: 2,
-                  overflow: 'hidden',
-                }}
-              >
-                <div
-                  style={{
-                    width: `${bootProgress * 100}%`,
-                    height: '100%',
-                    background: '#f97315',
-                    boxShadow: '0 0 10px rgba(249,115,21,0.7)',
-                    // Smooth between discrete network-chunk progress
-                    // updates so the bar reads as a continuous fill
-                    // rather than jumping in steps.
-                    transition: 'width 320ms cubic-bezier(0.22, 1, 0.36, 1)',
-                  }}
-                />
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  marginTop: 8,
-                  fontFamily: '"JetBrains Mono", monospace',
-                  fontSize: 10,
-                  letterSpacing: 1.8,
-                  color: 'rgba(255,255,255,0.5)',
-                }}
-              >
-                <span>{Math.round(bootProgress * 100)}%</span>
-                <span>BOOTING</span>
-              </div>
+              {/* Bar fill is a pure CSS keyframe animation — see
+                  .boot-bar-fill in index.html. No JS state. */}
+              <div className="boot-bar-fill" />
             </div>
           </div>
 
