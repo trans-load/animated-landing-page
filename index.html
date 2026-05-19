@@ -175,6 +175,23 @@
     50%      { opacity: 0.35; }
   }
 
+  /* Boot loader bar fill — pure CSS, linear 0→100% over 8s.
+     Transform-based (not width) so it renders correctly on mobile
+     Safari inside an overflow:hidden track. */
+  @keyframes bootBarFill {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+  }
+  .boot-bar-fill {
+    width: 100%;
+    height: 100%;
+    background: #f97315;
+    box-shadow: 0 0 10px rgba(249,115,21,0.7);
+    transform-origin: left center;
+    transform: scaleX(0);
+    animation: bootBarFill 8s linear forwards;
+  }
+
   /* Hover affordance on the YC backing badge — multiple cues so it's
      visibly interactive: "Combinator" turns orange + gets an underline,
      the Y mark scales up and gets a stronger glow, all spans nudge up
@@ -232,7 +249,7 @@
     /* iOS Safari covers ~100-130px of the 100vh sticky container with
        its bottom toolbar — give the headline enough room to clear the
        chrome but sit close to the bottom of the visible viewport. */
-    .hero-text { padding-bottom: 14vh !important; }
+    .hero-text { padding-bottom: 10vh !important; }
     /* Swap to the wider mobile register-tab variant. */
     .register-tab--desktop { display: none !important; }
     .register-tab--mobile  { display: block !important; }
