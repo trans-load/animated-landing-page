@@ -260,63 +260,18 @@ function App() {
             touchAction: 'none',
           }}
         >
-          {/* REC indicator top-left */}
-          <div
-            style={{
-              position: 'absolute',
-              top: 24,
-              left: 24,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 10,
-              padding: '8px 14px',
-              borderRadius: 6,
-              background: 'rgba(0,0,0,0.6)',
-              border: '1px solid rgba(255,255,255,0.14)',
-              fontFamily: '"JetBrains Mono", monospace',
-              fontWeight: 700,
-              fontSize: 14,
-              letterSpacing: 2.2,
-              color: '#fff',
-            }}
-          >
-            <span
-              style={{
-                width: 10,
-                height: 10,
-                borderRadius: '50%',
-                background: '#ff3b30',
-                boxShadow: '0 0 12px rgba(255,59,48,0.95)',
-                animation: 'cctvPulse 1.4s ease-in-out infinite',
-              }}
-            />
-            REC
-          </div>
-
           {/* Center stack: brand + boot line + progress bar */}
           <div style={{ textAlign: 'center', maxWidth: 480, padding: '0 24px' }}>
-            <div
+            <img
+              src="assets/logo-default.png?v=2"
+              alt="transload"
               style={{
-                fontFamily: '"JetBrains Mono", monospace',
-                fontSize: 11,
-                letterSpacing: 4,
-                color: 'rgba(255,255,255,0.5)',
-                marginBottom: 16,
+                height: 44,
+                width: 'auto',
+                display: 'block',
+                margin: '0 auto 28px',
               }}
-            >
-              TRANSLOAD · CCTV SYSTEM
-            </div>
-            <div
-              style={{
-                fontFamily: '"Inter", sans-serif',
-                fontWeight: 700,
-                fontSize: 28,
-                letterSpacing: '-0.02em',
-                marginBottom: 28,
-              }}
-            >
-              trans<span style={{ color: '#f97315' }}>l</span>oad
-            </div>
+            />
             <div
               style={{
                 fontFamily: '"JetBrains Mono", monospace',
