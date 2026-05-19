@@ -147,7 +147,7 @@ function Comparison({ accent = '#f97315' }) {
           <Card
             side="now"
             label={t('comparison.now.label')}
-            img="assets/now-highlighted.webp"
+            img="assets/now-highlighted.webp?v=2"
             rows={nowRows}
             accent={accent}
             inView={inView}

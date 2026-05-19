@@ -41,7 +41,7 @@ function ComparisonV3({ accent = '#f97315' }) {
     now: {
       label: t('comparison.now.label'),
       sublabel: t('comparison.now.sublabel'),
-      img: 'assets/now-highlighted.webp',
+      img: 'assets/now-highlighted.webp?v=2',
       rows: [t('comparison.now.row1'), t('comparison.now.row2'), t('comparison.now.row3')],
       tag: '02 / NOW',
       corner: 'LIVE',

@@ -714,27 +714,50 @@ function TrackingLookup({ accent = '#f97315' }) {
                     />
                   ));
                 })}
-                {/* "Dock door N" labels above each detected dock door.
-                    Drawn in image-space inside the SVG so they track the
-                    photo across any resize. */}
+                {/* When the user hovers a dock door, show its "DOCK DOOR N"
+                    label and thin connecting lines to each handling unit
+                    assigned to that gate. Drawn in image-space SVG so
+                    everything scales with the photo. */}
                 {docks.map((dk, gi) => {
-                  const [x, y, w] = dk.bbox;
+                  if (hoverId !== dk.id) return null;
+                  const [x, y, w, h] = dk.bbox;
                   const cx = x + w / 2;
+                  const dockBottomY = y + h;
                   const pillW = 150;
                   const pillH = 32;
                   const gap = 14;
                   const pillTop = Math.max(8, y - gap - pillH);
+                  const gateColor = GATE_COLORS[gi];
+                  const unitsInGate = itemsByGate[gi] || [];
                   return (
-                    <g key={`dock-label-${dk.id}`} style={{ pointerEvents: 'none' }}>
+                    <g key={`dock-hover-${dk.id}`} style={{ pointerEvents: 'none' }}>
+                      {/* Connecting lines from dock bottom to each unit */}
+                      {unitsInGate.map((it) => {
+                        const [ux, uy, uw, uh] = it.bbox;
+                        return (
+                          <line
+                            key={`dock-line-${dk.id}-${it.id}`}
+                            x1={cx}
+                            y1={dockBottomY}
+                            x2={ux + uw / 2}
+                            y2={uy + uh / 2}
+                            stroke={gateColor}
+                            strokeWidth={1.2}
+                            strokeOpacity={0.6}
+                            strokeDasharray="4 4"
+                          />
+                        );
+                      })}
+                      {/* "DOCK DOOR N" pill above the door */}
                       <rect
                         x={cx - pillW / 2}
                         y={pillTop}
                         width={pillW}
                         height={pillH}
                         rx={pillH / 2}
-                        fill="rgba(10, 10, 12, 0.78)"
-                        stroke={`${GATE_COLORS[gi]}55`}
-                        strokeWidth={1.2}
+                        fill="rgba(10, 10, 12, 0.85)"
+                        stroke={`${gateColor}aa`}
+                        strokeWidth={1.4}
                       />
                       <text
                         x={cx}
