@@ -795,10 +795,12 @@ function App() {
                   { f: 'koch.png', url: 'https://www.koch-international.de', scale: 1.0 },
                   { f: 'hofmann.png', url: 'https://www.hofmann-spedition.de/', scale: 1.1 },
                   { f: 'droeder.png', url: 'https://www.droeder-logistik.de', scale: 1.4 },
+                  { f: 'ctl.png', url: 'https://ctl-ag.de/', scale: 1.0 },
+                  { f: 'eberl.png', url: 'https://spedition-eberl.de/', scale: 1.0 },
                   { f: 'emc.png', url: 'https://www.ei.tum.de/emc/home/', scale: 1.0, keepFilter: true },
                   { f: 'xplore.png', url: 'https://www.unternehmertum.de/en/services/xplore', scale: 1.15 },
                   { f: 'utum.png', url: 'https://www.unternehmertum.de', scale: 1.0 },
-                  { f: 'tumvl.svg', url: 'https://www.tum.de', scale: 1.1, tone: 'light' },
+                  { f: 'tumvl.svg', url: 'https://www.tum.de', scale: 1.1 },
                 ].map(({ f, url, scale, tone, keepFilter }, i) => (
                   <a
                     key={`${dup}-${i}`}
@@ -1111,6 +1113,14 @@ function App() {
           Bilingual: i18n keys cover the headline, picker, gate labels,
           status badges, and the demo CTA. */}
       {window.TrackingLookup && <TrackingLookup accent={tweaks.accent} />}
+
+      {/* Customer testimonial — YouTube embed, lazy-mounted on scroll-in. */}
+      {window.Testimonial && <Testimonial accent={tweaks.accent} />}
+
+      {/* News — LinkedIn posts from the team, rendered as custom cards
+          that open the original post in an on-site modal (so the video
+          plays without leaving the page). */}
+      {window.News && <News accent={tweaks.accent} />}
 
       {/* Founder contact cards */}
       <FounderCards accent={tweaks.accent} />
