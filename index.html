@@ -4,13 +4,24 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#000000" />
-<!-- Pre-fetch the hero video immediately at HTML parse time so the
-     download runs in parallel with the Babel-in-browser transpile
-     (which adds 3-4s before App.jsx can even start). React picks up
-     the in-flight stream via window.__hero when it mounts. Cuts the
-     visible loading wait by roughly the duration of the transpile. -->
+<!-- Pre-fetch the hero video AND drive the boot overlay from inline
+     HTML/JS. Both run before the Babel-in-browser transpile of the
+     JSX scripts (which adds 3-4s before App.jsx can mount), so the
+     user sees a working boot screen + a real download underway from
+     the moment the HTML parses. React picks up the in-flight stream
+     via window.__hero when it eventually mounts. -->
 <script>
 (function () {
+  // Lock scroll as early as possible so the user can't scroll past
+  // the boot overlay while React is still booting. <body> may not
+  // exist yet when this script runs, so retry on the next tick.
+  try { document.documentElement.style.overflow = 'hidden'; } catch (e) {}
+  function lockBody() {
+    if (document.body) { try { document.body.style.overflow = 'hidden'; } catch (e) {} }
+    else setTimeout(lockBody, 8);
+  }
+  lockBody();
+
   if (typeof fetch !== 'function') return;
   var hero = (window.__hero = { progress: 0, blob: null, done: false, error: false });
   fetch('assets/hero.mp4?v=5').then(function (res) {
@@ -38,6 +49,73 @@
     hero.error = true;
     hero.done = true;
   });
+
+  // Drive the boot overlay independently of React. Bar tracks the
+  // slower of (elapsed/5s, downloadFraction); we unlock when
+  // (5s elapsed AND blob ready AND React rendered SOMETHING into
+  // #root), or at the 25s ceiling. Pure DOM mutation, no framework.
+  var BOOT_LINES = [
+    'INITIALIZING CAMERA FEED',
+    'CONNECTING TO DOCK-A',
+    'CALIBRATING LENS GEOMETRY',
+    'LOADING WAREHOUSE MODEL',
+    'SYSTEM READY'
+  ];
+  var start = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  var MIN_MS = 5000;
+  var MAX_MS = 25000;
+  function now() {
+    return (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  }
+  function reactMounted() {
+    var root = document.getElementById('root');
+    return !!(root && root.children && root.children.length > 0);
+  }
+  function tick() {
+    var elapsed = now() - start;
+    var timeP = Math.min(1, elapsed / MIN_MS);
+    var dlP = hero.progress;
+    var p = Math.min(timeP, dlP);
+
+    var bar = document.getElementById('boot-bar-fill');
+    if (bar) bar.style.transform = 'scaleX(' + p + ')';
+    var pct = document.getElementById('boot-percent');
+    if (pct) pct.textContent = Math.round(p * 100) + '%';
+    var lineEl = document.getElementById('boot-line-text');
+    if (lineEl) {
+      var idx = Math.min(BOOT_LINES.length - 1, Math.floor(p * BOOT_LINES.length));
+      lineEl.textContent = BOOT_LINES[idx];
+    }
+
+    var minDone = elapsed >= MIN_MS;
+    var ready = hero.done && reactMounted();
+    var ceiling = elapsed >= MAX_MS;
+    if ((minDone && ready) || ceiling) {
+      var overlay = document.getElementById('boot-overlay');
+      if (overlay) {
+        // Snap the bar/labels to 100 first so the visual matches the moment of unlock.
+        if (bar) bar.style.transform = 'scaleX(1)';
+        if (pct) pct.textContent = '100%';
+        overlay.classList.add('boot-overlay--fade');
+      }
+      try { document.documentElement.style.overflow = ''; } catch (e) {}
+      try { document.body.style.overflow = ''; } catch (e) {}
+      setTimeout(function () {
+        if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      }, 500);
+      window.__bootUnlocked = true;
+      try { window.dispatchEvent(new CustomEvent('boot-unlocked')); } catch (e) {}
+      return;
+    }
+    requestAnimationFrame(tick);
+  }
+  // Kick off after the DOM has the overlay nodes (small delay if body
+  // hasn't parsed yet).
+  function start_tick() {
+    if (document.getElementById('boot-overlay')) requestAnimationFrame(tick);
+    else setTimeout(start_tick, 8);
+  }
+  start_tick();
 })();
 </script>
 <link rel="icon" type="image/png" href="assets/favicon.png" />
@@ -211,21 +289,91 @@
     50%      { opacity: 0.35; }
   }
 
-  /* Boot loader bar fill — pure CSS, linear 0→100% over 8s.
-     Transform-based (not width) so it renders correctly on mobile
-     Safari inside an overflow:hidden track. */
-  @keyframes bootBarFill {
-    from { transform: scaleX(0); }
-    to   { transform: scaleX(1); }
+  /* Boot overlay — inline HTML+JS so it appears the instant the
+     HTML parses, before Babel finishes transpiling the JSX scripts.
+     The boot-bar-fill is driven imperatively by the inline script
+     (no CSS keyframe), so the bar reflects the actual download. */
+  #boot-overlay {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    color: #fff;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    touch-action: none;
+    opacity: 1;
+    transition: opacity 500ms ease;
   }
-  .boot-bar-fill {
+  #boot-overlay.boot-overlay--fade {
+    opacity: 0;
+    pointer-events: none;
+  }
+  #boot-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(255,255,255,0.045) 0px,
+      rgba(255,255,255,0.045) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    mix-blend-mode: screen;
+  }
+  #boot-overlay .boot-inner {
+    text-align: center;
+    max-width: 480px;
+    padding: 0 24px;
+  }
+  #boot-overlay .boot-logo {
+    height: 44px;
+    width: auto;
+    display: block;
+    margin: 0 auto 28px;
+  }
+  #boot-overlay .boot-line {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.85);
+    min-height: 20px;
+    margin-bottom: 24px;
+  }
+  #boot-overlay .boot-cursor {
+    animation: cctvPulse 0.9s ease-in-out infinite;
+  }
+  #boot-overlay .boot-bar-track {
+    width: 280px;
+    height: 2px;
+    margin: 0 auto;
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  #boot-overlay .boot-bar-fill {
     width: 100%;
     height: 100%;
     background: #f97315;
     box-shadow: 0 0 10px rgba(249,115,21,0.7);
     transform-origin: left center;
     transform: scaleX(0);
-    animation: bootBarFill 8s linear forwards;
+    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  #boot-overlay .boot-labels {
+    width: 280px;
+    margin: 8px auto 0;
+    display: flex;
+    justify-content: space-between;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 1.8px;
+    color: rgba(255,255,255,0.5);
   }
 
   /* Hover affordance on the YC backing badge — multiple cues so it's
@@ -331,6 +479,23 @@
 </style>
 </head>
 <body>
+<!-- Inline boot overlay — visible from the moment the body parses,
+     no wait for React. Driven by the inline script in <head>. -->
+<div id="boot-overlay">
+  <div class="boot-inner">
+    <img class="boot-logo" src="assets/logo-default.png?v=2" alt="transload" />
+    <div class="boot-line">
+      <span id="boot-line-text">INITIALIZING CAMERA FEED</span><span class="boot-cursor">_</span>
+    </div>
+    <div class="boot-bar-track">
+      <div id="boot-bar-fill" class="boot-bar-fill"></div>
+    </div>
+    <div class="boot-labels">
+      <span id="boot-percent">0%</span>
+      <span>BOOTING</span>
+    </div>
+  </div>
+</div>
 <div id="root"></div>
 <noscript><div style="font-family:Inter,system-ui,-apple-system,sans-serif;color:#fff;line-height:1.55;">
   <header style="max-width:1200px;margin:0 auto;padding:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">

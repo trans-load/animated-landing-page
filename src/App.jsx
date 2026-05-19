@@ -16,13 +16,13 @@ function App() {
   const [progress, setProgress] = useStateApp(0); // 0..1 over the transition window
   const [scrolled, setScrolled] = useStateApp(false);
   const [heroInView, setHeroInView] = useStateApp(true); // hero section still touching viewport
-  // CCTV-style boot overlay: blocks scroll for 8s on first load while
-  // the system "comes online", then fades out. The bar visual is a
-  // pure CSS animation; bootProgress is tracked in JS state purely
-  // for the cycling boot line + percentage label.
-  const [booting, setBooting] = useStateApp(true);
-  const [bootFading, setBootFading] = useStateApp(false);
-  const [bootProgress, setBootProgress] = useStateApp(0);
+  // Boot overlay is now rendered as inline HTML in index.html and
+  // driven entirely by the inline <head> script — so it can appear
+  // before Babel finishes transpiling the JSX (saving ~3-4s of
+  // perceived wait). React only needs to know about boot to no-op
+  // its own rendering of the overlay (gone) and to set a "ready"
+  // flag the inline script polls. The flag isn't needed since the
+  // inline script just checks if #root has children.
   // Live clock for the CCTV timestamp overlay during the intro phase.
   const [now, setNow] = useStateApp(() => new Date());
   useEffectApp(() => {
@@ -37,10 +37,6 @@ function App() {
   // bar shows truthful download progress so the wait is honest.
   const HERO_URL = 'assets/hero.mp4?v=5';
   const [heroVideoSrc, setHeroVideoSrc] = useStateApp(null);
-  // Refs so the boot rAF (empty deps) reads the latest values without
-  // a stale closure.
-  const downloadProgressRef = useRefApp(0);
-  const blobReadyRef = useRefApp(false);
   const heroRef = useRefApp(null);
   const videoRef = useRefApp(null);
   // Ref on the hero text container so the scroll rAF can mutate the
@@ -200,8 +196,6 @@ function App() {
       // back to the direct URL and let the <video> element preload
       // however much it can.
       setHeroVideoSrc(HERO_URL);
-      downloadProgressRef.current = 1;
-      blobReadyRef.current = true;
       return;
     }
     let aborted = false;
@@ -209,7 +203,6 @@ function App() {
     let pollId = 0;
     const poll = () => {
       if (aborted) return;
-      downloadProgressRef.current = hero.progress;
       if (hero.done) {
         if (hero.blob) {
           blobUrl = URL.createObjectURL(hero.blob);
@@ -217,7 +210,6 @@ function App() {
         } else {
           setHeroVideoSrc(HERO_URL);
         }
-        blobReadyRef.current = true;
         return;
       }
       pollId = setTimeout(poll, 80);
@@ -230,208 +222,11 @@ function App() {
     };
   }, []);
 
-  // Buffer warm-up: during the boot overlay, play the hero video at
-  // 16x speed (muted, hidden behind the overlay). This coerces Chrome
-  // out of its preload="auto" heuristic — which caps at ~30% of the
-  // file for non-playing videos — and forces it to fetch the whole
-  // clip to keep up with playback. Once the overlay starts fading,
-  // pause and rewind so the scroll-bound scrub takes over cleanly.
-  useEffectApp(() => {
-    if (!booting || bootFading) return;
-    const v = videoRef.current;
-    if (!v) return;
-    const startWarmup = () => {
-      try {
-        v.muted = true;
-        v.playbackRate = 16;
-        const p = v.play();
-        if (p && typeof p.then === 'function') p.catch(() => {});
-      } catch (e) {}
-    };
-    if (v.readyState >= 1) startWarmup();
-    else v.addEventListener('loadedmetadata', startWarmup, { once: true });
-    return () => {
-      try {
-        v.pause();
-        v.currentTime = 0;
-        v.playbackRate = 1;
-      } catch (e) {}
-    };
-  }, [booting, bootFading]);
-
-
-  // Boot sequence: lock scroll, drive a progress bar from the SLOWER of
-  // (elapsed/5s) and the real download fraction, and unlock only once
-  // the blob is in memory. 5s minimum atmosphere, 25s hard ceiling.
-  // Fast users: blob done in 2s, but bar fills over the full 5s for
-  // atmosphere. Slow users: bar reflects actual download speed and
-  // the screen lingers until the file is ready. The bar can never get
-  // stuck — bytes are always arriving from the network, and the
-  // ceiling guarantees forward motion regardless.
-  useEffectApp(() => {
-    if (typeof window === 'undefined') return;
-    const prevHtmlOverflow = document.documentElement.style.overflow;
-    const prevBodyOverflow = document.body.style.overflow;
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-    window.scrollTo(0, 0);
-
-    const start = performance.now();
-    const MIN_MS = 5000;
-    const MAX_MS = 25000;
-    let rafId = 0;
-    let fadeTimer = 0;
-    const tick = () => {
-      const elapsed = performance.now() - start;
-      const timeP = Math.min(1, elapsed / MIN_MS);
-      const dlP = downloadProgressRef.current;
-      // Bar tracks the SLOWER of the two constraints so it reflects
-      // the actual unlock condition: when bar hits 100%, both the
-      // 5s minimum has elapsed and the blob has downloaded, so we
-      // unlock immediately rather than dwelling at full.
-      setBootProgress(Math.min(timeP, dlP));
-
-      const minDone = elapsed >= MIN_MS;
-      const blobReady = blobReadyRef.current;
-      const ceilingHit = elapsed >= MAX_MS;
-
-      if ((minDone && blobReady) || ceilingHit) {
-        setBootProgress(1);
-        setBootFading(true);
-        fadeTimer = setTimeout(() => {
-          setBooting(false);
-          document.documentElement.style.overflow = prevHtmlOverflow;
-          document.body.style.overflow = prevBodyOverflow;
-        }, 500);
-      } else {
-        rafId = requestAnimationFrame(tick);
-      }
-    };
-    rafId = requestAnimationFrame(tick);
-    return () => {
-      cancelAnimationFrame(rafId);
-      clearTimeout(fadeTimer);
-      document.documentElement.style.overflow = prevHtmlOverflow;
-      document.body.style.overflow = prevBodyOverflow;
-    };
-  }, []);
-
   const bgColor =
     tweaks.bg === 'light' ? '#e9e7e2' : tweaks.bg === 'mid' ? '#1a1a1d' : '#ffffff';
 
-  const BOOT_LINES = [
-    'INITIALIZING CAMERA FEED',
-    'CONNECTING TO DOCK-A',
-    'CALIBRATING LENS GEOMETRY',
-    'LOADING WAREHOUSE MODEL',
-    'SYSTEM READY',
-  ];
-  const bootLineIdx = Math.min(BOOT_LINES.length - 1, Math.floor(bootProgress * BOOT_LINES.length));
-
   return (
     <div style={{ background: bgColor, color: '#0a0a0a', minHeight: '100vh' }}>
-      {booting && (
-        <div
-          aria-hidden="true"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: '#000',
-            zIndex: 99999,
-            opacity: bootFading ? 0 : 1,
-            transition: 'opacity 500ms ease',
-            pointerEvents: bootFading ? 'none' : 'auto',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            color: '#fff',
-            overflow: 'hidden',
-            // touch-action: none stops mobile Safari from swallowing the
-            // pull-to-refresh gesture under the overlay.
-            touchAction: 'none',
-          }}
-        >
-          {/* Center stack: logo + cycling boot line + linear bar + % */}
-          <div style={{ textAlign: 'center', maxWidth: 480, padding: '0 24px' }}>
-            <img
-              src="assets/logo-default.png?v=2"
-              alt="transload"
-              style={{
-                height: 44,
-                width: 'auto',
-                display: 'block',
-                margin: '0 auto 28px',
-              }}
-            />
-            <div
-              style={{
-                fontFamily: '"JetBrains Mono", monospace',
-                fontSize: 13,
-                letterSpacing: 2,
-                color: 'rgba(255,255,255,0.85)',
-                minHeight: 20,
-                marginBottom: 24,
-              }}
-            >
-              {BOOT_LINES[bootLineIdx]}
-              <span style={{ animation: 'cctvPulse 0.9s ease-in-out infinite' }}>_</span>
-            </div>
-            <div style={{ width: 280, margin: '0 auto' }}>
-              <div
-                style={{
-                  height: 2,
-                  background: 'rgba(255,255,255,0.15)',
-                  borderRadius: 2,
-                  overflow: 'hidden',
-                }}
-              >
-                {/* Bar fills from JS state (bootProgress) via transform
-                    scaleX — paints reliably on mobile Safari (vs width
-                    transitions which can drop frames inside an
-                    overflow:hidden parent). */}
-                <div
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    background: '#f97315',
-                    boxShadow: '0 0 10px rgba(249,115,21,0.7)',
-                    transformOrigin: 'left center',
-                    transform: `scaleX(${bootProgress})`,
-                    transition: 'transform 200ms cubic-bezier(0.22, 1, 0.36, 1)',
-                  }}
-                />
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  marginTop: 8,
-                  fontFamily: '"JetBrains Mono", monospace',
-                  fontSize: 10,
-                  letterSpacing: 1.8,
-                  color: 'rgba(255,255,255,0.5)',
-                }}
-              >
-                <span>{Math.round(bootProgress * 100)}%</span>
-                <span>BOOTING</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Scanlines */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              pointerEvents: 'none',
-              background:
-                'repeating-linear-gradient(0deg, rgba(255,255,255,0.045) 0px, rgba(255,255,255,0.045) 1px, transparent 1px, transparent 3px)',
-              mixBlendMode: 'screen',
-            }}
-          />
-        </div>
-      )}
       <Header accent={tweaks.accent} scrolled={scrolled} />
 
       {/* Hero: tall sticky section, drives the scroll transition.
