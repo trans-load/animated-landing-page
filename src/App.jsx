@@ -16,6 +16,11 @@ function App() {
   const [progress, setProgress] = useStateApp(0); // 0..1 over the transition window
   const [scrolled, setScrolled] = useStateApp(false);
   const [heroInView, setHeroInView] = useStateApp(true); // hero section still touching viewport
+  // CCTV-style boot overlay: blocks scroll for 5s on first load while
+  // the system "comes online", then fades out.
+  const [booting, setBooting] = useStateApp(true);
+  const [bootProgress, setBootProgress] = useStateApp(0);
+  const [bootFading, setBootFading] = useStateApp(false);
   // Live clock for the CCTV timestamp overlay during the intro phase.
   const [now, setNow] = useStateApp(() => new Date());
   useEffectApp(() => {
@@ -177,11 +182,157 @@ function App() {
   // rAF loop below reads v.buffered directly each frame, so we don't
   // need a separate listener + React state for it.)
 
+  // Boot sequence: lock scroll, scroll to top, animate progress 0→1 over
+  // 5s, then fade out (500ms) and unlock. Pin html+body so mobile Safari
+  // can't pull-scroll through the overlay.
+  useEffectApp(() => {
+    if (typeof window === 'undefined') return;
+    const prevHtmlOverflow = document.documentElement.style.overflow;
+    const prevBodyOverflow = document.body.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    window.scrollTo(0, 0);
+
+    const start = performance.now();
+    const DURATION_MS = 5000;
+    let rafId = 0;
+    let fadeTimer = 0;
+    const tick = () => {
+      const elapsed = performance.now() - start;
+      const p = Math.min(1, elapsed / DURATION_MS);
+      setBootProgress(p);
+      if (p < 1) {
+        rafId = requestAnimationFrame(tick);
+      } else {
+        setBootFading(true);
+        fadeTimer = setTimeout(() => {
+          setBooting(false);
+          document.documentElement.style.overflow = prevHtmlOverflow;
+          document.body.style.overflow = prevBodyOverflow;
+        }, 500);
+      }
+    };
+    rafId = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(fadeTimer);
+      document.documentElement.style.overflow = prevHtmlOverflow;
+      document.body.style.overflow = prevBodyOverflow;
+    };
+  }, []);
+
   const bgColor =
     tweaks.bg === 'light' ? '#e9e7e2' : tweaks.bg === 'mid' ? '#1a1a1d' : '#ffffff';
 
+  // CCTV-style boot lines — derived from progress so they reveal one at
+  // a time over the 5s window. Kept in English (terminal-style chrome)
+  // regardless of UI language; reads as the camera system coming online.
+  const BOOT_LINES = [
+    'INITIALIZING CAMERA FEED',
+    'CONNECTING TO DOCK-A',
+    'CALIBRATING LENS GEOMETRY',
+    'LOADING WAREHOUSE MODEL',
+    'SYSTEM READY',
+  ];
+  const bootLineIdx = Math.min(BOOT_LINES.length - 1, Math.floor(bootProgress * BOOT_LINES.length));
+
   return (
     <div style={{ background: bgColor, color: '#0a0a0a', minHeight: '100vh' }}>
+      {booting && (
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: '#000',
+            zIndex: 99999,
+            opacity: bootFading ? 0 : 1,
+            transition: 'opacity 500ms ease',
+            pointerEvents: bootFading ? 'none' : 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            color: '#fff',
+            overflow: 'hidden',
+            // touch-action: none stops mobile Safari from swallowing the
+            // pull-to-refresh gesture under the overlay.
+            touchAction: 'none',
+          }}
+        >
+          {/* Center stack: brand + boot line + progress bar */}
+          <div style={{ textAlign: 'center', maxWidth: 480, padding: '0 24px' }}>
+            <img
+              src="assets/logo-default.png?v=2"
+              alt="transload"
+              style={{
+                height: 44,
+                width: 'auto',
+                display: 'block',
+                margin: '0 auto 28px',
+              }}
+            />
+            <div
+              style={{
+                fontFamily: '"JetBrains Mono", monospace',
+                fontSize: 13,
+                letterSpacing: 2,
+                color: 'rgba(255,255,255,0.85)',
+                minHeight: 20,
+                marginBottom: 24,
+              }}
+            >
+              {BOOT_LINES[bootLineIdx]}
+              <span style={{ opacity: bootProgress < 1 ? 1 : 0, animation: 'cctvPulse 0.9s ease-in-out infinite' }}>_</span>
+            </div>
+            <div style={{ width: 280, margin: '0 auto' }}>
+              <div
+                style={{
+                  height: 2,
+                  background: 'rgba(255,255,255,0.15)',
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                }}
+              >
+                <div
+                  style={{
+                    width: `${bootProgress * 100}%`,
+                    height: '100%',
+                    background: '#f97315',
+                    boxShadow: '0 0 10px rgba(249,115,21,0.7)',
+                  }}
+                />
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  marginTop: 8,
+                  fontFamily: '"JetBrains Mono", monospace',
+                  fontSize: 10,
+                  letterSpacing: 1.8,
+                  color: 'rgba(255,255,255,0.5)',
+                }}
+              >
+                <span>{Math.round(bootProgress * 100)}%</span>
+                <span>BOOTING</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Scanlines */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              pointerEvents: 'none',
+              background:
+                'repeating-linear-gradient(0deg, rgba(255,255,255,0.045) 0px, rgba(255,255,255,0.045) 1px, transparent 1px, transparent 3px)',
+              mixBlendMode: 'screen',
+            }}
+          />
+        </div>
+      )}
       <Header accent={tweaks.accent} scrolled={scrolled} />
 
       {/* Hero: tall sticky section, drives the scroll transition.
