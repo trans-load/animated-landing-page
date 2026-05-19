@@ -1114,13 +1114,12 @@ function App() {
           status badges, and the demo CTA. */}
       {window.TrackingLookup && <TrackingLookup accent={tweaks.accent} />}
 
-      {/* Customer testimonial — YouTube embed, lazy-mounted on scroll-in. */}
-      {window.Testimonial && <Testimonial accent={tweaks.accent} />}
-
-      {/* News — LinkedIn posts from the team, rendered as custom cards
-          that open the original post in an on-site modal (so the video
-          plays without leaving the page). */}
+      {/* News — LinkedIn embed posts (white section, dark-framed cards). */}
       {window.News && <News accent={tweaks.accent} />}
+
+      {/* Customer testimonial — YouTube embed on the dark surface, sits
+          directly under the white News section for visual contrast. */}
+      {window.Testimonial && <Testimonial accent={tweaks.accent} />}
 
       {/* Founder contact cards */}
       <FounderCards accent={tweaks.accent} />
