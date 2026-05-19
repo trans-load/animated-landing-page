@@ -405,11 +405,12 @@
     --rev: calc(1 - var(--local));
     opacity: var(--local);
     transform: translateY(calc(var(--rev) * 0.5em)) scale(calc(1 + var(--rev) * 0.25));
+    /* Single soft drop-shadow for legibility on the video, plus the
+       orange flare during the reveal. Was three stacked dark layers
+       (1px / 14px / 38px), which ghosted letters into one another. */
     text-shadow:
       0 0 calc(var(--rev) * 22px) rgba(249, 115, 21, calc(var(--rev) * 0.85)),
-      0 1px 2px rgba(0,0,0,0.85),
-      0 2px 14px rgba(0,0,0,0.75),
-      0 0 38px rgba(0,0,0,0.55);
+      0 2px 8px rgba(0,0,0,0.55);
     will-change: opacity, transform;
   }
   .hero-yc-pill {
