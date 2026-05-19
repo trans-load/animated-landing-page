@@ -179,10 +179,11 @@ function App() {
 
 
   // Boot sequence: lock scroll, scroll to top, animate a smooth progress
-  // bar over 5s, then fade out (500ms) and unlock. Plain timer, no
+  // bar over 8s, then fade out (500ms) and unlock. Plain timer, no
   // buffer checks — the video preloads in parallel via preload="auto"
   // on the <video> element, and the existing seek clamp in the scroll
-  // rAF handles any unbuffered range gracefully.
+  // rAF handles any unbuffered range gracefully. 8s buys enough budget
+  // for a 19 MB 1080p file on a ~20 Mbps connection.
   useEffectApp(() => {
     if (typeof window === 'undefined') return;
     const prevHtmlOverflow = document.documentElement.style.overflow;
@@ -192,7 +193,7 @@ function App() {
     window.scrollTo(0, 0);
 
     const start = performance.now();
-    const DURATION_MS = 5000;
+    const DURATION_MS = 8000;
     let rafId = 0;
     let fadeTimer = 0;
     const tick = () => {
