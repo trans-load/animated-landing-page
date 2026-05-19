@@ -1,0 +1,25 @@
+tools/linkedin-banner/.gitignore
+  s_a8fd6b03953646::t_b464dc3663bdf0 1
+tools/linkedin-banner/render.sh
+  s_a8fd6b03953646::t_a67fdfe945ed0a 1-53
+tools/linkedin-banner/banner.html
+  s_a8fd6b03953646::t_2ce837477d59dc 1-123
+tools/linkedin-banner/README.md
+  s_a8fd6b03953646::t_2553fe3a36e3f0 1-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.9",
+  "base_commit_sha": "34bcacb294bd0e0981ee545c88c6d4f66ec79bf1",
+  "prompts": {},
+  "sessions": {
+    "s_a8fd6b03953646": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2b3cde69-6693-4cdc-b0da-5e6aae34e9a1",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Nils Boerner <boerner_nils@gmx.de>"
+    }
+  }
+}
