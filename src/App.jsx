@@ -29,8 +29,18 @@ function App() {
     const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
   }, []);
-  // Single hero video source — same 1080p file on desktop and mobile.
-  const heroVideoSrc = 'assets/hero.mp4?v=4';
+  // We fetch the hero video ourselves and feed the <video> a blob URL.
+  // This is the ONLY way to defeat Chrome's preload heuristic, which
+  // caps non-playing video fetch around 30% (and the 16x-playback
+  // workaround gets undone by buffer eviction). Boot waits for the
+  // blob to be ready before unlocking — variable duration, but the
+  // bar shows truthful download progress so the wait is honest.
+  const HERO_URL = 'assets/hero.mp4?v=5';
+  const [heroVideoSrc, setHeroVideoSrc] = useStateApp(null);
+  // Refs so the boot rAF (empty deps) reads the latest values without
+  // a stale closure.
+  const downloadProgressRef = useRefApp(0);
+  const blobReadyRef = useRefApp(false);
   const heroRef = useRefApp(null);
   const videoRef = useRefApp(null);
   // Ref on the hero text container so the scroll rAF can mutate the
@@ -177,6 +187,63 @@ function App() {
   // rAF loop below reads v.buffered directly each frame, so we don't
   // need a separate listener + React state for it.)
 
+  // Download the hero as a blob via streamed fetch so we can show
+  // truthful byte-level progress and feed the <video> a blob URL
+  // (which can't be evicted by Chrome). Falls back to the direct
+  // URL if fetch hits an error or the 25s ceiling.
+  useEffectApp(() => {
+    if (typeof window === 'undefined' || typeof fetch !== 'function') {
+      setHeroVideoSrc(HERO_URL);
+      downloadProgressRef.current = 1;
+      blobReadyRef.current = true;
+      return;
+    }
+    let aborted = false;
+    let blobUrl = null;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
+    (async () => {
+      try {
+        const res = await fetch(HERO_URL, { signal: controller.signal });
+        if (!res.ok || !res.body) throw new Error('hero fetch failed');
+        const total = parseInt(res.headers.get('content-length') || '0', 10);
+        const reader = res.body.getReader();
+        const chunks = [];
+        let received = 0;
+        while (!aborted) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+          received += value.byteLength;
+          if (total > 0) {
+            downloadProgressRef.current = Math.min(1, received / total);
+          }
+        }
+        if (!aborted) {
+          const blob = new Blob(chunks, { type: 'video/mp4' });
+          blobUrl = URL.createObjectURL(blob);
+          setHeroVideoSrc(blobUrl);
+          downloadProgressRef.current = 1;
+          blobReadyRef.current = true;
+        }
+      } catch (e) {
+        if (!aborted) {
+          setHeroVideoSrc(HERO_URL);
+          downloadProgressRef.current = 1;
+          blobReadyRef.current = true;
+        }
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    })();
+    return () => {
+      aborted = true;
+      controller.abort();
+      clearTimeout(timeoutId);
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
+    };
+  }, []);
+
   // Buffer warm-up: during the boot overlay, play the hero video at
   // 16x speed (muted, hidden behind the overlay). This coerces Chrome
   // out of its preload="auto" heuristic — which caps at ~30% of the
@@ -207,10 +274,14 @@ function App() {
   }, [booting, bootFading]);
 
 
-  // Boot sequence: lock scroll for 8s, then fade and unlock. The bar
-  // visual is driven by CSS keyframes (see .boot-bar-fill in
-  // index.html); this rAF only updates bootProgress for the cycling
-  // text + percentage label.
+  // Boot sequence: lock scroll, drive a progress bar from the SLOWER of
+  // (elapsed/5s) and the real download fraction, and unlock only once
+  // the blob is in memory. 5s minimum atmosphere, 25s hard ceiling.
+  // Fast users: blob done in 2s, but bar fills over the full 5s for
+  // atmosphere. Slow users: bar reflects actual download speed and
+  // the screen lingers until the file is ready. The bar can never get
+  // stuck — bytes are always arriving from the network, and the
+  // ceiling guarantees forward motion regardless.
   useEffectApp(() => {
     if (typeof window === 'undefined') return;
     const prevHtmlOverflow = document.documentElement.style.overflow;
@@ -220,26 +291,38 @@ function App() {
     window.scrollTo(0, 0);
 
     const start = performance.now();
-    const DURATION_MS = 8000;
+    const MIN_MS = 5000;
+    const MAX_MS = 25000;
     let rafId = 0;
+    let fadeTimer = 0;
     const tick = () => {
       const elapsed = performance.now() - start;
-      const p = Math.min(1, elapsed / DURATION_MS);
-      setBootProgress(p);
-      if (p < 1) rafId = requestAnimationFrame(tick);
+      const timeP = Math.min(1, elapsed / MIN_MS);
+      const dlP = downloadProgressRef.current;
+      // Bar visualises whichever is FURTHER ALONG — keeps the bar
+      // moving forward smoothly even if one signal stalls.
+      setBootProgress(Math.max(timeP, dlP));
+
+      const minDone = elapsed >= MIN_MS;
+      const blobReady = blobReadyRef.current;
+      const ceilingHit = elapsed >= MAX_MS;
+
+      if ((minDone && blobReady) || ceilingHit) {
+        setBootProgress(1);
+        setBootFading(true);
+        fadeTimer = setTimeout(() => {
+          setBooting(false);
+          document.documentElement.style.overflow = prevHtmlOverflow;
+          document.body.style.overflow = prevBodyOverflow;
+        }, 500);
+      } else {
+        rafId = requestAnimationFrame(tick);
+      }
     };
     rafId = requestAnimationFrame(tick);
-
-    const fadeAt = setTimeout(() => setBootFading(true), 8000);
-    const unlockAt = setTimeout(() => {
-      setBooting(false);
-      document.documentElement.style.overflow = prevHtmlOverflow;
-      document.body.style.overflow = prevBodyOverflow;
-    }, 8500);
     return () => {
       cancelAnimationFrame(rafId);
-      clearTimeout(fadeAt);
-      clearTimeout(unlockAt);
+      clearTimeout(fadeTimer);
       document.documentElement.style.overflow = prevHtmlOverflow;
       document.body.style.overflow = prevBodyOverflow;
     };
@@ -315,9 +398,21 @@ function App() {
                   overflow: 'hidden',
                 }}
               >
-                {/* Pure CSS keyframe scaleX 0→1 over 8s — see
-                    .boot-bar-fill in index.html. */}
-                <div className="boot-bar-fill" />
+                {/* Bar fills from JS state (bootProgress) via transform
+                    scaleX — paints reliably on mobile Safari (vs width
+                    transitions which can drop frames inside an
+                    overflow:hidden parent). */}
+                <div
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    background: '#f97315',
+                    boxShadow: '0 0 10px rgba(249,115,21,0.7)',
+                    transformOrigin: 'left center',
+                    transform: `scaleX(${bootProgress})`,
+                    transition: 'transform 200ms cubic-bezier(0.22, 1, 0.36, 1)',
+                  }}
+                />
               </div>
               <div
                 style={{
