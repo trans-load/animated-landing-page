@@ -52,7 +52,7 @@
       'tracking.select': 'Select a handling unit',
       'tracking.carrier': 'Carrier',
       'tracking.destination': 'Destination',
-      'tracking.gate': 'Gate',
+      'tracking.gate': 'Dock door',
       'tracking.click_here': 'Click here',
       'tracking.tip.status': 'Status',
       'tracking.tip.dest': 'Dest',
@@ -77,7 +77,7 @@
       'comparison.past.row3': 'Drivers waiting at the dimensioner',
       'comparison.now.label': 'Now',
       'comparison.now.sublabel': 'Fast and automatic',
-      'comparison.now.row1': 'Dimensions for every item',
+      'comparison.now.row1': 'Dimensions for every handling unit',
       'comparison.now.row2': 'Measure everywhere on the terminal',
       'comparison.now.row3': 'Runs fully in the background \u2014 no extra steps',
 

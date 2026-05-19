@@ -36,11 +36,13 @@ function Header({ accent = '#f97315', scrolled = false }) {
         pointerEvents: 'none',
       }}
     >
-      {/* Liquid-glass pill: heavy blur + saturation boost so the bar
-          actually frosts the content behind it instead of just sitting
-          on top with a flat tint. Multi-layer shadow: a tight specular
-          highlight at the top edge, a soft dark drop below, and a thin
-          inner ring for depth — that's what reads as "liquid glass". */}
+      {/* Floating pill. We previously used a heavy blur(32px) + saturate
+          + brightness for a "liquid-glass" feel, but on a fixed element
+          that overlays scrolling content (and a playing hero video) the
+          per-frame compositor cost made scroll judder visibly. A smaller
+          10px blur with a denser background reads as a frosted pill at a
+          fraction of the GPU cost — the specular shadow stack is kept so
+          the bar still has depth. */}
       <div
         style={{
           pointerEvents: 'auto',
@@ -50,15 +52,14 @@ function Header({ accent = '#f97315', scrolled = false }) {
           padding: '8px 8px 8px 20px',
           borderRadius: 999,
           background: scrolled
-            ? 'rgba(20, 20, 22, 0.22)'
-            : 'rgba(20, 20, 22, 0.12)',
-          backdropFilter: 'blur(32px) saturate(180%) brightness(110%)',
-          WebkitBackdropFilter: 'blur(32px) saturate(180%) brightness(110%)',
+            ? 'rgba(20, 20, 22, 0.78)'
+            : 'rgba(20, 20, 22, 0.62)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
           border: '1px solid rgba(255,255,255,0.14)',
           boxShadow:
-            '0 1px 0 rgba(255,255,255,0.22) inset,' +
+            '0 1px 0 rgba(255,255,255,0.18) inset,' +
             '0 -1px 0 rgba(255,255,255,0.04) inset,' +
-            '0 0 0 0.5px rgba(255,255,255,0.06),' +
             '0 10px 28px rgba(0,0,0,0.22),' +
             '0 4px 12px rgba(0,0,0,0.14)',
           transition: 'background 200ms ease',
