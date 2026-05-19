@@ -182,9 +182,12 @@ function App() {
   // rAF loop below reads v.buffered directly each frame, so we don't
   // need a separate listener + React state for it.)
 
-  // Boot sequence: lock scroll, scroll to top, animate progress 0→1 over
-  // 7s, then fade out (500ms) and unlock. Pin html+body so mobile Safari
-  // can't pull-scroll through the overlay.
+  // Boot sequence: lock scroll, scroll to top, drive a progress bar that
+  // tracks the SLOWER of (elapsed/7s, buffered/duration). Unlock when
+  // BOTH the minimum 7s has elapsed AND the hero video is ≥98% buffered,
+  // OR when the 12s hard ceiling hits — so fast connections still feel
+  // the 7s atmosphere, slow ones get a fully-buffered page, and no one
+  // is stuck behind a stalled CDN forever.
   useEffectApp(() => {
     if (typeof window === 'undefined') return;
     const prevHtmlOverflow = document.documentElement.style.overflow;
@@ -194,22 +197,46 @@ function App() {
     window.scrollTo(0, 0);
 
     const start = performance.now();
-    const DURATION_MS = 7000;
+    const MIN_MS = 7000;
+    const MAX_MS = 12000;
+    const UNLOCK_THRESHOLD = 0.98;
     let rafId = 0;
     let fadeTimer = 0;
     const tick = () => {
       const elapsed = performance.now() - start;
-      const p = Math.min(1, elapsed / DURATION_MS);
-      setBootProgress(p);
-      if (p < 1) {
-        rafId = requestAnimationFrame(tick);
-      } else {
+      const timeP = Math.min(1, elapsed / MIN_MS);
+
+      // Read the actual hero-video buffer state. Default to 1 (treat as
+      // fully buffered) while metadata is still loading so the bar
+      // doesn't stall at 0; the unlock condition below uses bufP
+      // directly, so this default only affects the visualisation.
+      let bufP = 1;
+      const v = videoRef.current;
+      if (v && v.duration && isFinite(v.duration)) {
+        const b = v.buffered;
+        const end = b && b.length > 0 ? b.end(b.length - 1) : 0;
+        bufP = Math.min(1, end / v.duration);
+      }
+
+      // Show the SLOWER of the two — so the bar is honest: fast
+      // connections see linear 7s fill, slow ones see the bar lag
+      // behind the timer until the network catches up.
+      setBootProgress(Math.min(timeP, bufP));
+
+      const minDone = elapsed >= MIN_MS;
+      const bufDone = bufP >= UNLOCK_THRESHOLD;
+      const ceilingHit = elapsed >= MAX_MS;
+
+      if ((minDone && bufDone) || ceilingHit) {
+        setBootProgress(1);
         setBootFading(true);
         fadeTimer = setTimeout(() => {
           setBooting(false);
           document.documentElement.style.overflow = prevHtmlOverflow;
           document.body.style.overflow = prevBodyOverflow;
         }, 500);
+      } else {
+        rafId = requestAnimationFrame(tick);
       }
     };
     rafId = requestAnimationFrame(tick);
