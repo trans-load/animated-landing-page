@@ -29,8 +29,13 @@ function App() {
     const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
   }, []);
-  // Single hero video source — same 1080p file on desktop and mobile.
-  const heroVideoSrc = 'assets/hero.mp4?v=4';
+  // We fetch the hero video ourselves and hand the <video> element a
+  // blob URL. Chrome's preload="auto" stops fetching around 30% for
+  // non-playing videos (and evicts already-played ranges if we try the
+  // fast-playback warmup workaround), so the only reliable way to get
+  // the whole 19 MB clip into memory is to download it ourselves.
+  const HERO_URL = 'assets/hero.mp4?v=5';
+  const [heroVideoSrc, setHeroVideoSrc] = useStateApp(null);
   const heroRef = useRefApp(null);
   const videoRef = useRefApp(null);
   // Ref on the hero text container so the scroll rAF can mutate the
@@ -177,34 +182,35 @@ function App() {
   // rAF loop below reads v.buffered directly each frame, so we don't
   // need a separate listener + React state for it.)
 
-  // Buffer warm-up: during the boot overlay, play the hero video at
-  // 16x speed (muted, hidden behind the overlay). This coerces Chrome
-  // out of its preload="auto" heuristic — which caps at ~30% of the
-  // file for non-playing videos — and forces it to fetch the whole
-  // clip to keep up with playback. Once the overlay starts fading,
-  // pause and rewind so the scroll-bound scrub takes over cleanly.
+  // Download the hero video as a blob and feed the <video> element a
+  // blob URL. Bypasses Chrome's preload heuristic + buffer eviction.
+  // Boot bar is CSS-driven so it doesn't depend on this completing.
   useEffectApp(() => {
-    if (!booting || bootFading) return;
-    const v = videoRef.current;
-    if (!v) return;
-    const startWarmup = () => {
+    if (typeof window === 'undefined' || typeof fetch !== 'function') {
+      setHeroVideoSrc(HERO_URL);
+      return;
+    }
+    let aborted = false;
+    let blobUrl = null;
+    (async () => {
       try {
-        v.muted = true;
-        v.playbackRate = 16;
-        const p = v.play();
-        if (p && typeof p.then === 'function') p.catch(() => {});
-      } catch (e) {}
-    };
-    if (v.readyState >= 1) startWarmup();
-    else v.addEventListener('loadedmetadata', startWarmup, { once: true });
+        const res = await fetch(HERO_URL);
+        if (!res.ok) throw new Error('hero fetch failed');
+        const blob = await res.blob();
+        if (!aborted) {
+          blobUrl = URL.createObjectURL(blob);
+          setHeroVideoSrc(blobUrl);
+        }
+      } catch (e) {
+        // Fall back to the direct URL if fetch fails.
+        if (!aborted) setHeroVideoSrc(HERO_URL);
+      }
+    })();
     return () => {
-      try {
-        v.pause();
-        v.currentTime = 0;
-        v.playbackRate = 1;
-      } catch (e) {}
+      aborted = true;
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
     };
-  }, [booting, bootFading]);
+  }, []);
 
 
   // Boot sequence: lock scroll for 8s, then fade and unlock. The bar
