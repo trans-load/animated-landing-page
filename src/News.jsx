@@ -161,12 +161,30 @@ function News({ accent = '#f97315' }) {
 
       <style>{`
         @media (max-width: 900px) {
-          .news-section { padding: 64px 20px 64px !important; }
+          .news-section { padding: 64px 0 64px !important; }
+          .news-section > div { padding-left: 20px; padding-right: 20px; }
+          /* Swap the grid for a horizontally-scrollable rail. Cards take
+             ~84% of the viewport so the next one peeks in, hinting at the
+             swipe affordance. scroll-snap keeps each card centred when
+             the user lets go. The rail extends past the section's 20px
+             text padding so swipes feel edge-to-edge. */
           .news-grid {
-            grid-template-columns: 1fr !important;
-            gap: 16px !important;
+            display: flex !important;
+            grid-template-columns: none !important;
+            gap: 14px !important;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding: 4px 20px 14px;
+            margin: 0 -20px;
           }
-          .news-card { min-height: 520px !important; }
+          .news-grid::-webkit-scrollbar { display: none; }
+          .news-card {
+            flex: 0 0 84vw;
+            scroll-snap-align: start;
+            min-height: 520px !important;
+          }
           .news-card iframe { height: 520px !important; }
         }
       `}</style>
